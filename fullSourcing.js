@@ -62,7 +62,6 @@ function parseDateMDY(str) {
   const datePart = str.split(" ")[0]; // "3/4/2025"
   const [m, d, y] = datePart.split("/");
   if (!m || !d || !y) return null;
-  // 注意：月份从 0 开始
   return new Date(Number(y), Number(m) - 1, Number(d));
 }
 
@@ -90,16 +89,17 @@ function parsePct(pctStr) {
   return val / 100;
 }
 
-// 返回 "Past Due" 或当前月份简称（如 "Mar"）
+// **修改后的核心函数**：返回 "Past Due" 或该日期的月份名
+const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 function getAnchor(date) {
   if (!date) return "";
   const now = new Date();
-  // 若 date < 当前时间，则 Past Due，否则返回当前月份
-  return date < now ? "Past Due" : monthNames[now.getMonth()];
+  // 若 date < now => "Past Due"
+  // 否则 => month name of date (本身的月份)
+  return date < now ? "Past Due" : monthNames[date.getMonth()];
 }
-
-const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 //--------------------------------------------------------------------
 // 主处理流程
@@ -224,15 +224,10 @@ async function processFiles() {
     // ============ 8) 设置 paid 字段 ============
     finalData.forEach(line => {
       const poNum = line["PO #"] || "";
-      if (paidMap.hasOwnProperty(poNum)) {
-        line["paid"] = paidMap[poNum];
-      } else {
-        line["paid"] = 0;
-      }
+      line["paid"] = paidMap.hasOwnProperty(poNum) ? paidMap[poNum] : 0;
     });
 
     // ============ 9) 统计与移除 success / totalRecords ============
-    // 先计算统计值
     const emptyWowCount = finalData.filter(line => !line["Wow_Payment_Terms"]).length;
     const conflictCount = finalData.filter(line => {
       const t1 = (line["term_name"] || "").trim();
@@ -242,23 +237,15 @@ async function processFiles() {
 
     // ============ 10) 再次遍历，为每个元素添加“Deposit”、“Prepay”、“Unpaid”等信息 ============
 
-    // 帮助函数：根据 "Date Entered" 计算 Deposit Date, 根据 "ERD" + "Net_Days" 计算 Unpaid Date
-    // Anchor 判断：若 date < now => "Past Due"，否则返回当前月份简称
-    const now = new Date();
-
     finalData.forEach(line => {
       // 解析数字
       const balanceVal = parseFloat(line["Balance"] || "0") || 0;
       const paidVal = parseFloat(line["paid"] || "0") || 0;
 
       // 1) Unpaid = Balance - paid
-      const unpaidVal = balanceVal - paidVal; // 可能为负则表示超付，但此处按题意直接保留
-      // 将 “Unpaid” 做成一个对象，包含多个子字段
-      // 为避免冲突，这里直接将所有相关字段放在同一个 "Unpaid" 对象里
-      // 若你想和题意完全一致（即 "Unpaid" 同时是数字、又是对象），那将冲突，故此以对象方案示例
-      // 如果你确实想要同名字段，可改名 "UnpaidObj" 等。
+      const unpaidVal = balanceVal - paidVal;
       line["Unpaid"] = {
-        value: +unpaidVal.toFixed(2) // 保留两位
+        value: +unpaidVal.toFixed(2)
       };
 
       // 2) Deposit
@@ -267,32 +254,31 @@ async function processFiles() {
       const dateEntered = parseDateMDY(line["Date Entered"] || "");
       const depositDate = addDays(dateEntered, 14);
       const depositDateStr = formatDateMDY(depositDate);
+      // 新逻辑: anchor = Past Due / 月份名(取depositDate)
       const depositAnchor = getAnchor(depositDate);
 
       let depositDue = 0;
       if (paidVal <= 0) {
         depositDue = depositFrac * balanceVal;
       }
-      // 生成 Deposit 对象
       line["Deposit"] = {
         "Deposit Date": depositDateStr,
-        "Deposit % Due": line["Deposit_Required"] || "0%", // 原样放回
+        "Deposit % Due": line["Deposit_Required"] || "0%",
         "Deposit anchor": depositAnchor,
         "Deposit $ Due": +depositDue.toFixed(2)
       };
 
       // 3) Prepay
       const prepayFrac = parsePct(line["Prepay_H"]); // 0~1
-      // parse "Estimated Ready Date / ERD"
       const erd = parseDateMDY(line["Estimated Ready Date / ERD"] || "");
       const prepayDateStr = formatDateMDY(erd);
+      // 新逻辑: anchor = Past Due / 月份名(取erd)
       const prepayAnchor = getAnchor(erd);
 
       let prepayDue = 0;
       if (paidVal > 0) {
-        // 题意：若 paid <= 0 => 0，否则 prepayFrac × Unpaid
         prepayDue = prepayFrac * unpaidVal;
-        if (prepayDue < 0) prepayDue = 0; // 若 unpaidVal < 0，则保持 0
+        if (prepayDue < 0) prepayDue = 0;
       }
       line["Prepay"] = {
         "Prepay Date": prepayDateStr,
@@ -302,33 +288,30 @@ async function processFiles() {
       };
 
       // 4) Unpaid (对象部分)
-      // = 1 - depositFrac - prepayFrac
       let remainderFrac = 1 - depositFrac - prepayFrac;
       if (remainderFrac < 0) remainderFrac = 0;
-      const unpaidPctStr = `${(remainderFrac * 100).toFixed(0)}%`; // 转回百分比整数
+      const unpaidPctStr = `${(remainderFrac * 100).toFixed(0)}%`;
 
       // "Unpaid Date" = ERD + Net_Days
       const netDays = parseInt(line["Net_Days"] || "0", 10);
       const unpaidDate = addDays(erd, netDays);
       const unpaidDateStr = formatDateMDY(unpaidDate);
+      // 新逻辑: anchor = Past Due / 月份名(取unpaidDate)
       const unpaidAnchor = getAnchor(unpaidDate);
 
       let unpaidDue = 0;
       if (paidVal > 0) {
-        const portion = remainderFrac * balanceVal; 
-        // 若 portion 大于当前未付 unpaidVal，就取未付金额
+        const portion = remainderFrac * balanceVal;
         unpaidDue = Math.min(portion, unpaidVal);
-        if (unpaidDue < 0) unpaidDue = 0; // 防止负数
+        if (unpaidDue < 0) unpaidDue = 0;
       }
-
-      // 直接在之前的 line["Unpaid"] 里继续添加
       line["Unpaid"]["Unpaid Date"] = unpaidDateStr;
       line["Unpaid"]["Unpaid % Due"] = unpaidPctStr;
       line["Unpaid"]["Unpaid anchor"] = unpaidAnchor;
       line["Unpaid"]["Unpaid $ Due"] = +unpaidDue.toFixed(2);
     });
 
-    // ============ 最终统计并输出 ============
+    // 最终结果
     const finalJson = {
       data: finalData,
       "Removals Dulplicate Line": removalCount,
