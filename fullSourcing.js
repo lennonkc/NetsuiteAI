@@ -299,11 +299,10 @@ async function processFiles() {
       // 新逻辑: anchor = Past Due / 月份名(取unpaidDate)
       const unpaidAnchor = getAnchor(unpaidDate);
 
-      let unpaidDue = 0;
+      let unpaidDue = balanceVal - paidVal;
       if (paidVal > 0) {
         const portion = remainderFrac * balanceVal;
         unpaidDue = Math.min(portion, unpaidVal);
-        if (unpaidDue < 0) unpaidDue = 0;
       }
       line["Unpaid"]["Unpaid Date"] = unpaidDateStr;
       line["Unpaid"]["Unpaid % Due"] = unpaidPctStr;
