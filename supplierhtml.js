@@ -1,3 +1,246 @@
+  
+  //生成Merge表
+function generateMergeBudget(aggregatedData) {
+    // 1) 定义表格的列（顺序）
+    const budgetCols = ["YTD","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","FY 25"];
+  
+    // 2) 准备一个帮助函数：从 aggregatedData 中，汇总所有 Supplier 在某个列名（colName）上的总和。
+    function sumAllSuppliers(colName) {
+      let sum = 0;
+      for (const supplier of Object.keys(aggregatedData)) {
+        const val = aggregatedData[supplier][colName] || 0;
+        sum += val;
+      }
+      return sum;
+    }
+  
+    // 3) 定义一个将数字转为“$xx.xxM”形式的函数
+    //    比如 13920000 => "$13.92M"; 若值较小也会得到 "$0.00M"
+    function formatMillion(value) {
+      const millionVal = value / 1e6; // 转为百万单位
+      return `$${millionVal.toFixed(2)}M`;
+    }
+  
+    // 4) 计算“Open POs / AP outstanding”这一行每个列的数值
+    //    - YTD => "Past Due - Total" 列的汇总
+    //    - Mar => "Mar - Total" 列的汇总
+    //    - Apr => "Apr - Total" ...
+    //    - Dec => "Dec - Total"
+    //    - FY 25 => 上面这些列值的合计
+    const ytdVal  = sumAllSuppliers("Past Due - Total");
+    const marVal  = sumAllSuppliers("Mar - Total");
+    const aprVal  = sumAllSuppliers("Apr - Total");
+    const mayVal  = sumAllSuppliers("May - Total");
+    const junVal  = sumAllSuppliers("Jun - Total");
+    const julVal  = sumAllSuppliers("Jul - Total");
+    const augVal  = sumAllSuppliers("Aug - Total");
+    const sepVal  = sumAllSuppliers("Sep - Total");
+    const octVal  = sumAllSuppliers("Oct - Total");
+    const novVal  = sumAllSuppliers("Nov - Total");
+    const decVal  = sumAllSuppliers("Dec - Total");
+  
+    // FY 25 => 把上面所有加起来
+    const fy25Val = (ytdVal + marVal + aprVal + mayVal + junVal + julVal + augVal 
+                     + sepVal + octVal + novVal + decVal);
+  
+    // 将它们转成 "$xx.xxM" 的字符串
+    const openPOsData = [
+      formatMillion(ytdVal),  // YTD
+      formatMillion(marVal),  // Mar
+      formatMillion(aprVal),  // Apr
+      formatMillion(mayVal),  // May
+      formatMillion(junVal),  // Jun
+      formatMillion(julVal),  // Jul
+      formatMillion(augVal),  // Aug
+      formatMillion(sepVal),  // Sep
+      formatMillion(octVal),  // Oct
+      formatMillion(novVal),  // Nov
+      formatMillion(decVal),  // Dec
+      formatMillion(fy25Val), // FY 25
+    ];
+  
+    // 5) 现在我们构建这个“MergeBudget”表格的行数据
+    //    - 第一列是行标题，后面 12 列是 YTD,Mar,...,FY25
+    //    - 为了写得清晰，我们用一个数组 rows，每个元素包含:
+    //      {
+    //        label: "行名称",
+    //        data: [... 12个列 ...],
+    //        isBold: boolean,     // 是否字体加粗 (Total Budget)
+    //        isPurple: boolean,   // 是否整行紫色背景
+    //        isInput: boolean,    // 是否每个单元格用 <input> 包裹
+    //      }
+    const rows = [
+      {
+        label: "Total Budget",
+        data: [
+          "$13.92M","$3.07M","$3.66M","$5.02M","$5.30M",
+          "$6.31M","$6.76M","$6.14M","$5.61M","$5.33M",
+          "$6.02M","$67.13M"
+        ],
+        isBold: true,
+        isPurple: false,
+        isInput: false
+      },
+      {
+        label: "Open POs / AP outstanding",
+        data: openPOsData,
+        isBold: false,
+        isPurple: false,
+        isInput: false
+      },
+      {
+        label: "Approved buy - US",
+        data: new Array(12).fill(""), // 12 列都为空
+        isBold: false,
+        isPurple: true,  // 紫色背景
+        isInput: true    // 用 <input> 包裹
+      },
+      {
+        label: "Approved buy - UK",
+        data: new Array(12).fill(""),
+        isBold: false,
+        isPurple: true,
+        isInput: true
+      },
+      {
+        label: "Approved buy - NPI",
+        data: new Array(12).fill(""),
+        isBold: false,
+        isPurple: true,
+        isInput: true
+      },
+      {
+        label: "Approved buy - Components",
+        data: new Array(12).fill(""),
+        isBold: false,
+        isPurple: true,
+        isInput: true
+      },
+      {
+        label: "Approved buy - BAM",
+        data: new Array(12).fill(""),
+        isBold: false,
+        isPurple: true,
+        isInput: true
+      },
+    ];
+  
+    // 6) 生成 HTML
+    //    与之前类似，为方便独立展示，我们写一套简单样式
+    let html = `
+      <style>
+        /* 可以与之前表格区分，也可公用类似样式 */
+        .merge-budget-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: Arial, sans-serif;
+        }
+  
+        .merge-budget-table thead tr {
+          background-color: #007bff;
+          color: #fff;
+          text-align: left;
+        }
+  
+        .merge-budget-table th, .merge-budget-table td {
+          border: 1px solid #ccc;
+          padding: 8px;
+          white-space: normal;
+          /* 固定列宽：第一列200px，其余50px */
+        }
+        .merge-budget-table th:first-child,
+        .merge-budget-table td:first-child {
+          width: 200px;
+        }
+        .merge-budget-table th:not(:first-child),
+        .merge-budget-table td:not(:first-child) {
+          width: 50px;
+          min-width: 50px;
+        }
+  
+        /* 让表格可横向滚动 */
+        .merge-budget-container {
+          width: 100%;
+          overflow-x: auto;
+        }
+  
+        /* 紫色背景行 */
+        .purple-row {
+          background-color: #d9b3ff; /* 或其他紫色 */
+        }
+
+        input {
+            border: none; /* 去除边框 */
+            background-color: #d9b3ff; /* 设置背景颜色为紫色 */
+            color: white; /* 让文本颜色变白，以提高可读性 */
+            padding: 5px; /* 添加一些内边距，使输入框更美观 */
+            outline: none; /* 去除点击时的默认外边框 */
+        }
+
+        /* 可根据需求自定义 input 样式 */
+        .merge-budget-table input[type="text"] {
+          width: 100%;
+          box-sizing: border-box;
+        }
+      </style>
+      <div class="merge-budget-container">
+        <table class="merge-budget-table">
+          <thead>
+            <tr>
+              <th></th>
+    `;
+  
+    // 6.1 表头: YTD, Mar, Apr, ..., FY 25
+    budgetCols.forEach(col => {
+      html += `<th>${col}</th>`;
+    });
+    html += `</tr>
+          </thead>
+          <tbody>
+    `;
+
+    // 6.2 遍历 rows 输出每一行
+    rows.forEach(row => {
+      // 如果是紫色行 => 加一个 class
+      const rowClass = row.isPurple ? "purple-row" : "";
+      // 如果要加粗 => <td style="font-weight:bold">
+      html += `<tr class="${rowClass}">`;
+  
+      // 第一列: 行名称 (可选是否加粗)
+      html += `<td style="${row.isBold ? 'font-weight:bold;' : ''}">${row.label}</td>`;
+  
+      // 后面 12 列
+      row.data.forEach(cellVal => {
+        // 如果是 input 行 => <td><input type="text" value="cellVal" /></td>
+        if (row.isInput) {
+          html += `<td><input type="text" value="${cellVal}" /></td>`;
+        } else {
+          // 如果要加粗 => <td style="font-weight:bold">...
+          const style = row.isBold ? 'font-weight:bold;' : '';
+          html += `<td style="${style}">${cellVal}</td>`;
+        }
+      });
+  
+      html += `</tr>`;
+    });
+  
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
+  
+    html += `<h3> 
+    💥 Warning 💥 There are 93 records having unregonize "Payment_Terms" value
+    will cause the data not 100% correct.
+    <br>
+    😄 Accuracy assessment 😄 629 PO were analyzed, the accuracy expect to be 
+    <span style="font-size: 50px; font-weight: bold; color: #ff6600; text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5); font-family: 'Arial Black', sans-serif;"> 1-(93/629)=85% </span>
+    </h3>
+    `;
+    return html;
+  }
+ //生成summary表
 function generateHTMLTable(maindata) {
     // 1. 数据源
     const dataArray = maindata.data || [];
@@ -147,7 +390,7 @@ function generateHTMLTable(maindata) {
             <tr>
               <th>Supplier</th>
     `;
-  
+
     // 7.1 输出其余列表头
     columnKeys.forEach(col => {
       html += `<th>${col}</th>`;
@@ -174,17 +417,17 @@ function generateHTMLTable(maindata) {
   
       html += `</tr>`;
     });
-  
+    
     html += `
           </tbody>
         </table>
       </div>
     `;
-  
-    return html;
+    const mergeBudgetHtml = generateMergeBudget(aggregatedData);
+    return [html,mergeBudgetHtml];
   }
-  
-  
+
+
   const maindata = {
     "data": [
       {
@@ -45482,5 +45725,7 @@ function generateHTMLTable(maindata) {
     "payment term conflict": 365
   };
 
-  const htmlString = generateHTMLTable(maindata);
-  require('fs').writeFileSync('supplierTable.html', htmlString, 'utf8');
+  const summaryHtmlString = generateHTMLTable(maindata)[0];
+  const mergedHtmlString = generateHTMLTable(maindata)[1];
+  require('fs').writeFileSync('summaryHtmlTable.html', summaryHtmlString, 'utf8');
+  require('fs').writeFileSync('mergedTable.html', mergedHtmlString, 'utf8');
