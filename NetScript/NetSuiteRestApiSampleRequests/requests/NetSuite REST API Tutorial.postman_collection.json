@@ -1,0 +1,1940 @@
+{
+	"info": {
+		"_postman_id": "eda8b64d-d434-4483-8013-f6446cb93ea7",
+		"name": "NetSuite REST API Tutorial",
+		"description": "Version: 1.1.1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "0 Test",
+			"item": [
+				{
+					"name": "Example 0.1: Test Request",
+					"request": {
+						"method": "OPTIONS",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/*",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"*"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('response should be okay to process', () => {",
+							"    pm.response.to.not.be.error;",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "1 Metadata",
+			"item": [
+				{
+					"name": "Example 1.1: Metadata Options for Customer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/metadata-catalog/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"metadata-catalog",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 1.2: OpenAPI for Customer",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/swagger+json"
+							}
+						],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/metadata-catalog/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"metadata-catalog",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 1.3: JSON Schema for Customer",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/schema+json"
+							}
+						],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/metadata-catalog/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"metadata-catalog",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 1.4: OpenAPI for Customer and Sales Order",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/swagger+json"
+							}
+						],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/metadata-catalog?select=customer,salesOrder",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"metadata-catalog"
+							],
+							"query": [
+								{
+									"key": "select",
+									"value": "customer,salesOrder"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('response should be okay to process', () => {",
+							"    pm.response.to.not.be.error;",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "2 Record CRUD",
+			"item": [
+				{
+					"name": "Example 2.1: Create Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"if (pm.response.code === 204) {",
+									"    const loc = pm.response.headers.get(\"Location\");",
+									"    const split = loc.split('/');",
+									"    const id = split[split.length - 1];",
+									"    ",
+									"    pm.environment.set(\"lastCustomer\", id);",
+									"}",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"companyName\": \"Company {{$timestamp}}\",\n\t\"email\": \"customer@company.com\"\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 2.2: Get Customer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer/{{lastCustomer}}",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer",
+								"{{lastCustomer}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 2.3: Update Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"companyName\": \"Updated Customer {{$timestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer/{{lastCustomer}}",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer",
+								"{{lastCustomer}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 2.4: Remove Customer",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer/{{lastCustomer}}",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer",
+								"{{lastCustomer}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('response should be okay to process', () => {",
+							"    pm.response.to.not.be.error;",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "3 Sublist CRUD",
+			"item": [
+				{
+					"name": "Example 3.1: Create Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"if (pm.response.code === 204) {",
+									"    const loc = pm.response.headers.get(\"Location\");",
+									"    const split = loc.split('/');",
+									"    const id = split[split.length - 1];",
+									"    ",
+									"    pm.environment.set(\"lastCustomer\", id);",
+									"}",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"entityId\": \"Another Customer {{$timestamp}}\",\n\t\"companyName\": \"Another Company {{$timestamp}}\",\n\t\"email\": \"another.customer@company.com\"\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 3.2: Create Item for Sale",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"if (pm.response.code === 204) {",
+									"    const loc = pm.response.headers.get(\"Location\");",
+									"    const split = loc.split('/');",
+									"    const id = split[split.length - 1];",
+									"    ",
+									"    pm.environment.set(\"lastItem\", id);",
+									"}",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"itemId\": \"SalesItem {{$timestamp}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/nonInventorySaleItem",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"nonInventorySaleItem"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 3.3: Create Sales Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"if (pm.response.code === 204) {",
+									"    const loc = pm.response.headers.get(\"Location\");",
+									"    const split = loc.split('/');",
+									"    const id = split[split.length - 1];",
+									"    ",
+									"    pm.environment.set(\"lastSalesOrder\", id);",
+									"}",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"entity\": { \"id\": {{lastCustomer}} },\n\t\"item\": {\n\t\t\"items\": [{\n\t\t\t\"item\": { \"id\": {{lastItem}} },\n\t\t\t\"rate\": 10\n\t\t}]\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/salesOrder",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"salesOrder"
+							]
+						},
+						"description": "items hell!"
+					},
+					"response": []
+				},
+				{
+					"name": "Example 3.4: Add Item to Sales Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"item\": {\n\t\t\"items\": [{\n\t\t\t\"line\": 1,\n\t\t\t\"item\": { \"id\": {{lastItem}} },\n\t\t\t\"rate\": 20\n\t\t}, {\n\t\t\t\"item\": { \"id\": {{lastItem}} },\n\t\t\t\"rate\": 30\n\t\t}]\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/salesOrder/{{lastSalesOrder}}",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"salesOrder",
+								"{{lastSalesOrder}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 3.5: Replace Sales Order Items",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"item\": {\n\t\t\"items\": [{\n\t\t\t\"item\": { \"id\": {{lastItem}} },\n\t\t\t\"rate\": 40\n\t\t}, {\n\t\t\t\"item\": { \"id\": {{lastItem}} },\n\t\t\t\"rate\": 50\n\t\t}]\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/salesOrder/{{lastSalesOrder}}?replace=item",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"salesOrder",
+								"{{lastSalesOrder}}"
+							],
+							"query": [
+								{
+									"key": "replace",
+									"value": "item"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 3.6: Get Sales Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/salesOrder/{{lastSalesOrder}}?expandSubResources=true",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"salesOrder",
+								"{{lastSalesOrder}}"
+							],
+							"query": [
+								{
+									"key": "expandSubResources",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('response should be okay to process', () => {",
+							"    pm.response.to.not.be.error;",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "4 Subrecord CRUD",
+			"item": [
+				{
+					"name": "Example 4.1: Create Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"if (pm.response.code === 204) {",
+									"    const loc = pm.response.headers.get(\"Location\");",
+									"    const split = loc.split('/');",
+									"    const id = split[split.length - 1];",
+									"    ",
+									"    pm.environment.set(\"lastCustomer\", id);",
+									"}",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"entityId\": \"Another Customer {{$timestamp}}\",\n\t\"companyName\": \"Another Company {{$timestamp}}\",\n\t\"email\": \"another.customer@company.com\",\n\t\"addressBook\": {\n\t\t\"items\": [{\n\t\t\t\"label\": \"New York HQ\",\n\t\t\t\"addressBookAddress\": {\n\t\t\t\t\"country\": { \"id\": \"US\" },\n\t\t\t\t\"state\": \"NY\",\n\t\t\t\t\"zip\": \"10001\",\n\t\t\t\t\"addressee\": \"Dwight Schrute\"\n\t\t\t}\n\t\t}]\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 4.2: Get Customer Addresses",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.items).to.be.ok;",
+									"    pm.expect(body.items.length).to.eql(1);",
+									"    pm.expect(body.items[0].internalId).to.be.ok;",
+									"    const id = body.items[0].internalId;",
+									"    ",
+									"    pm.environment.set(\"firstAddress\", id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer/{{lastCustomer}}/addressBook?expandSubResources=true",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer",
+								"{{lastCustomer}}",
+								"addressBook"
+							],
+							"query": [
+								{
+									"key": "expandSubResources",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 4.3: Update ZIP on Customer Address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\t\n\t\"addressBook\": {\n\t\t\"items\": [{\n\t\t\t\"internalId\": {{firstAddress}},\n\t\t\t\"addressBookAddress\": {\n\t\t\t\t\"zip\": \"10005\"\n\t\t\t}\n\t\t}]\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer/{{lastCustomer}}",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer",
+								"{{lastCustomer}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('response should be okay to process', () => {",
+							"    pm.response.to.not.be.error;",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "5 External Id",
+			"item": [
+				{
+					"name": "Example 5.1: Create Customer with External Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"if (pm.response.code === 204) {",
+									"    const loc = pm.response.headers.get(\"Location\");",
+									"    const split = loc.split('/');",
+									"    const id = split[split.length - 1];",
+									"    ",
+									"    pm.environment.set(\"lastCustomer\", id);",
+									"}",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"customerExternalId\", \"MYCUST\" + new Date().getTime());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"companyName\": \"Company with External Id {{$timestamp}}\",\n\t\"email\": \"customer@company.com\"\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer/eid:{{customerExternalId}}",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer",
+								"eid:{{customerExternalId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 5.2: Get Customer via External Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer/eid:{{customerExternalId}}",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer",
+								"eid:{{customerExternalId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 5.3: Update Customer via External Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"if (pm.response.code === 204) {",
+									"    const loc = pm.response.headers.get(\"Location\");",
+									"    const split = loc.split('/');",
+									"    const id = split[split.length - 1];",
+									"    ",
+									"    pm.environment.set(\"lastCustomer\", id);",
+									"}",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"companyName\": \"Updated Company with External Id {{$timestamp}}\"\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer/eid:{{customerExternalId}}",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer",
+								"eid:{{customerExternalId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 5.4: Create or Update Item for Sale",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"if (pm.response.code === 204) {",
+									"    const loc = pm.response.headers.get(\"Location\");",
+									"    const split = loc.split('/');",
+									"    const id = split[split.length - 1];",
+									"    ",
+									"    pm.environment.set(\"lastItem\", id);",
+									"}",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"itemExternalId\", \"MYITEM\" + new Date().getTime());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"itemId\": \"SalesItem {{$timestamp}} with External Id\"\r\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/nonInventorySaleItem/eid:{{itemExternalId}}",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"nonInventorySaleItem",
+								"eid:{{itemExternalId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 5.5: Create Sales Order with External Ids in References",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"if (pm.response.code === 204) {",
+									"    const loc = pm.response.headers.get(\"Location\");",
+									"    const split = loc.split('/');",
+									"    const id = split[split.length - 1];",
+									"    ",
+									"    pm.environment.set(\"lastSalesOrder\", id);",
+									"}",
+									"",
+									"pm.test('response should not contain any property validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should not contain any system warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-Warning\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"entity\": { \"externalId\": \"{{customerExternalId}}\" },\n\t\"item\": {\n\t\t\"items\": [{\n\t\t\t\"item\": { \"externalId\": \"{{itemExternalId}}\" },\n\t\t\t\"rate\": 60\n\t\t}]\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/salesOrder",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"salesOrder"
+							]
+						},
+						"description": "items hell!"
+					},
+					"response": []
+				},
+				{
+					"name": "Example 5.6: Get Sales Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/salesOrder/{{lastSalesOrder}}?expandSubResources=true",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"salesOrder",
+								"{{lastSalesOrder}}"
+							],
+							"query": [
+								{
+									"key": "expandSubResources",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('response should be okay to process', () => {",
+							"    pm.response.to.not.be.error;",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "6 Filtering",
+			"item": [
+				{
+					"name": "Example 6.1: List All Customers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 6.2: Find Customer by Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer?q=email CONTAIN customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "email CONTAIN customer"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 6.3: Find Customer by Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer?q=companyName START_WITH \"Another Company\"",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "companyName START_WITH \"Another Company\""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 6.4: Find Inactive Customers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer?q=isInactive IS true",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "isInactive IS true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 6.5: Find Customers Created This Year with Paging",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"thisYearStart\", \"1/1/\" + new Date().getFullYear().toString());",
+									"pm.environment.set(\"thisYearEnd\", \"1/1/\" + (new Date().getFullYear() + 1).toString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer?q=dateCreated ON_OR_AFTER \"{{thisYearStart}}\" AND dateCreated BEFORE \"{{thisYearEnd}}\"&limit=2&offset=2",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "dateCreated ON_OR_AFTER \"{{thisYearStart}}\" AND dateCreated BEFORE \"{{thisYearEnd}}\""
+								},
+								{
+									"key": "limit",
+									"value": "2"
+								},
+								{
+									"key": "offset",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 6.6: Find Customers with High or Low Credit Limit",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer?q=creditLimit GREATER_OR_EQUAL 1000 OR creditLimit LESS_OR_EQUAL 10",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "creditLimit GREATER_OR_EQUAL 1000 OR creditLimit LESS_OR_EQUAL 10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 6.7: Find Customers with Ids in Range",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer?q=id BETWEEN [0, 500]",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "id BETWEEN [0, 500]"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('response should be okay to process', () => {",
+							"    pm.response.to.not.be.error;",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "7 Query",
+			"item": [
+				{
+					"name": "Example 7.1: Find Customers Created This Year",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"thisYearStart\", \"1/1/\" + new Date().getFullYear().toString());",
+									"pm.environment.set(\"thisYearEnd\", \"1/1/\" + (new Date().getFullYear() + 1).toString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "prefer",
+								"type": "text",
+								"value": "transient"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"q\": \"SELECT id, companyName, email, dateCreated FROM customer WHERE dateCreated >= '{{thisYearStart}}' AND dateCreated < '{{thisYearEnd}}'\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/query/v1/suiteql?limit=5",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"query",
+								"v1",
+								"suiteql"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 7.2: Pair Sales Orders With Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "prefer",
+								"value": "transient",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"q\": \"SELECT c.email AS email, c.companyName AS company, t.tranId AS document, t.tranDate AS date FROM customer c, transaction t WHERE t.entity = c.id AND t.type = 'SalesOrd'\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/query/v1/suiteql?limit=5",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"query",
+								"v1",
+								"suiteql"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.test('response should be okay to process', () => {",
+							"    pm.response.to.not.be.error;",
+							"});"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "8 Failure Processing",
+			"item": [
+				{
+					"name": "Example 8.1: Invalid Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should not be okay to process', () => {",
+									"    pm.response.to.be.error;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 8.2: Get Non-Existing Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should not be okay to process', () => {",
+									"    pm.response.to.be.error;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer/99999999",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer",
+								"99999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 8.3: Non-Matching External Id in URL and Body",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should not be okay to process', () => {",
+									"    pm.response.to.be.error;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"companyName\": \"Company with External Id {{$timestamp}}\",\n\t\"email\": \"customer@company.com\",\n\t\"subsidiary\": { \"id\": 1 },\n\t\"externalId\": \"BODY_ERROR\"\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer/eid:URL_ERROR",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer",
+								"eid:URL_ERROR"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 8.4: Incorrect Field Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should not be okay to process', () => {",
+									"    pm.response.to.be.error;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "X-NetSuite-PropertyNameValidation",
+								"value": "error",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"entityId\": \"Customer {{$timestamp}}\",\n\t\"companyName\": \"Company {{$timestamp}}\",\n\t\"non_existing_field\": \"Invalid field name\"\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 8.5: Incorrect Field Value",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should not be okay to process', () => {",
+									"    pm.response.to.be.error;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "X-NetSuite-PropertyValueValidation",
+								"type": "text",
+								"value": "error"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"entityId\": \"Customer {{$timestamp}}\",\n\t\"companyName\": \"Company {{$timestamp}}\",\n\t\"sendEmail\": \"This should be Boolean\"\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Example 8.6: System Warning",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response should not be okay to process', () => {",
+									"    pm.response.to.not.be.error;",
+									"});",
+									"",
+									"pm.test('response should contain location header', () => {",
+									"    pm.response.to.have.header(\"Location\");",
+									"});",
+									"",
+									"if (pm.response.code === 204) {",
+									"    const loc = pm.response.headers.get(\"Location\");",
+									"    const split = loc.split('/');",
+									"    const id = split[split.length - 1];",
+									"    ",
+									"    pm.environment.set(\"lastCustomer\", id);",
+									"}",
+									"",
+									"pm.test('response should not contain any validation warnings', () => {",
+									"    pm.response.to.not.have.header(\"X-NetSuite-PropertyValidation\");",
+									"});",
+									"",
+									"pm.test('response should contain a system warning', () => {",
+									"    pm.response.to.have.header(\"X-NetSuite-Warning\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"entityId\": \"Customer With No Zip {{$timestamp}}\",\n\t\"companyName\": \"Company With No Zip  {{$timestamp}}\",\n\t\"email\": \"another.customer@company.com\",\n\t\"addressBook\": {\n\t\t\"items\": [{\n\t\t\t\"label\": \"New York HQ\",\n\t\t\t\"addressBookAddress\": {\n\t\t\t\t\"country\": { \"id\": \"US\" },\n\t\t\t\t\"state\": \"NY\",\n\t\t\t\t\"addressee\": \"Dwight Schrute\"\n\t\t\t}\n\t\t}]\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{REST_SERVICES}}/record/v1/customer",
+							"host": [
+								"{{REST_SERVICES}}"
+							],
+							"path": [
+								"record",
+								"v1",
+								"customer"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "oauth1",
+		"oauth1": [
+			{
+				"key": "realm",
+				"value": "{{ACCOUNT_ID}}",
+				"type": "string"
+			},
+			{
+				"key": "tokenSecret",
+				"value": "{{TOKEN_SECRET}}",
+				"type": "string"
+			},
+			{
+				"key": "token",
+				"value": "{{TOKEN_ID}}",
+				"type": "string"
+			},
+			{
+				"key": "consumerSecret",
+				"value": "{{CONSUMER_SECRET}}",
+				"type": "string"
+			},
+			{
+				"key": "consumerKey",
+				"value": "{{CONSUMER_KEY}}",
+				"type": "string"
+			},
+			{
+				"key": "addParamsToHeader",
+				"value": true,
+				"type": "boolean"
+			},
+			{
+				"key": "signatureMethod",
+				"value": "HMAC-SHA256",
+				"type": "string"
+			},
+			{
+				"key": "version",
+				"value": "1.0",
+				"type": "string"
+			},
+			{
+				"key": "addEmptyParamsToSign",
+				"value": false,
+				"type": "boolean"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

@@ -1,0 +1,296 @@
+很棒, 你做的很好,请帮我写一个新的js文件,fullSourceing.js. 我现在有两个json文件, 第一个json文件中的data数组元素中的"ID"指的就是第二个JSON文件中的"entityid".
+请帮我遍历第一个数组文件中的data数组, 并且为每个数组元素根据"ID"检索"entityid", 然后为这个元素增加一个"term_name", 如果无法找到对应的"term_name", 则应该将"term_name"设置为空"".
+最后将处理后的数据保存到一个新的json文件中, 文件名为 fullSources.json
+
+Record03_05_20_04.json 文件数据示例
+{
+    "success": true,
+    "totalRecords": 3281,
+    "data": [
+        {
+            "As Of Date": "3/4/2025 10:46 pm",
+            "Coordinator": "Shivangi Pradhan",
+            "Brand": "",
+            "Whse Internal ID": "1234",
+            "Warehouse": "Carrier to NA [Virtual]",
+            "Seller Account": "ChomChom US",
+            "Amazon Store Name": "ChomChom_US",
+            "Supplier": "Nippon Seal",
+            "Status": "Pending Supervisor Approval",
+            "PO #": "PO66707",
+            "Memo": "",
+            "Date Entered": "3/4/2025 7:58 am",
+            "ESTIMATED READY DATE": "",
+            "PO Line No.": "0",
+            "ASIN": "",
+            "SKU": "",
+            "Assembly SKU": "",
+            "Description": "",
+            "Quantity": "",
+            "Cost in USD": "",
+            "Cost in PO Currency": "",
+            "Currency": "USD",
+            "Estimated Ready Date / ERD": "",
+            "Early Pickup date": "",
+            "Late Pickup Date": "",
+            "Earliest Delivery Date": "",
+            "LATEST DELIVERY DATE": "",
+            "Quantity Received": "0",
+            "Quantity on Inbound Shipments": "",
+            "Supplier Shipping Country Code": "CN",
+            "Supplier Billing Country Code": "CN",
+            "Supplier Ship From Country Code (From PO)": "CN",
+            "Closed": false,
+            "Custom Form": "Thrasio SC Purchase Order",
+            "XPO Integration Status": "",
+            "Outbound Doc Sent to XPO Connect": "",
+            "Send to XPO Connect": false,
+            "ID": "N-CN-00071",
+            "Destination Type": "",
+            "INCOTERM": "",
+            "ARN#": "",
+            "FBA Shipment ID#": "",
+            "3PL FCID#": ""
+        },
+        {
+            "As Of Date": "3/4/2025 10:46 pm",
+            "Coordinator": "Shivangi Pradhan",
+            "Brand": "ChomChom Roller",
+            "Whse Internal ID": "1234",
+            "Warehouse": "Carrier to NA [Virtual]",
+            "Seller Account": "ChomChom US",
+            "Amazon Store Name": "ChomChom_US",
+            "Supplier": "Nippon Seal",
+            "Status": "Pending Supervisor Approval",
+            "PO #": "PO66707",
+            "Memo": "",
+            "Date Entered": "3/4/2025 7:58 am",
+            "ESTIMATED READY DATE": "",
+            "PO Line No.": "1",
+            "ASIN": "B0C2FMZMHP",
+            "SKU": "CCR-PET-ROLVR-BLK",
+            "Assembly SKU": "",
+            "Description": "ChomChom Roller - Black - Variation",
+            "Quantity": "40176",
+            "Cost in USD": "3.763",
+            "Cost in PO Currency": "3.763",
+            "Currency": "USD",
+            "Estimated Ready Date / ERD": "5/5/2025",
+            "Early Pickup date": "5/6/2025",
+            "Late Pickup Date": "5/13/2025",
+            "Earliest Delivery Date": "5/14/2025",
+            "LATEST DELIVERY DATE": "7/14/2025",
+            "Quantity Received": "0",
+            "Quantity on Inbound Shipments": "",
+            "Supplier Shipping Country Code": "CN",
+            "Supplier Billing Country Code": "CN",
+            "Supplier Ship From Country Code (From PO)": "CN",
+            "Closed": false,
+            "Custom Form": "Thrasio SC Purchase Order",
+            "XPO Integration Status": "",
+            "Outbound Doc Sent to XPO Connect": "",
+            "Send to XPO Connect": false,
+            "ID": "N-CN-00071",
+            "Destination Type": "",
+            "INCOTERM": "FOB",
+            "ARN#": "",
+            "FBA Shipment ID#": "",
+            "3PL FCID#": ""
+        }
+    ]
+}
+
+VendorID_03_05_20_53.json 文件数据示例
+{
+    "links": [
+      {
+        "rel": "self",
+        "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql"
+      }
+    ],
+    "count": 122,
+    "hasMore": false,
+    "items": [
+        {
+            "links": [],
+            "companyname": "Boston Bean Coffee Company",
+            "entityid": "50",
+            "id": "1541"
+          },
+          {
+            "links": [],
+            "companyname": "TLC Janitorial",
+            "entityid": "333",
+            "id": "1824",
+            "term_name": "Net 10",
+            "terms": "23"
+          },
+          {
+            "links": [],
+            "companyname": "Advanced Science Laboratories, Inc.",
+            "entityid": "48821",
+            "id": "55388"
+          }
+       ],
+    "offset": 0,
+    "totalResults": 122
+  }
+
+
+
+
+我希望在原有逻辑上, 继续优化fullSources.json的数据内容.
+我现在有一个paid_Feb25.csv文件, 这个文件记录了所有"PO #"的值的paid情况
+我希望在原fullSources.json的数据源准备完成后还没写入真正写入之前, 继续优化数据源,
+再次遍历数据源, 遍历所有的元素的"PO #"
+当存在"PO Line No.": "0" 时, 对同个"PO #"的不同"PO Line No."进行以下操作
+
+将"PO Line No.": "1" 的除了"PO Line No.", ”Quantity", ”Cost in USD"的其他keys的value设置到"PO Line No.": "0"的这个元素中,  
+字符串拼接同个PO的不同PO Line的"“"PO Line No." 到"PO Line No.": "0"的这个元素
+字符串拼接同个PO的不同PO Line的”Quantity"到"PO Line No.": "0"的这个元素, 
+字符串拼接同个PO的不同PO Line的”和”Cost in USD"到"PO Line No.": "0"的这个元素
+为"PO Line No.": "0"的这个元素添加一个 "Balance“ 字段, 这个字段的值是同个PO的不同PO Line的"Quantity“*”Cost in USD"的结果的累加. 
+删掉同PO号码的其他元素,只保留"PO Line No.": "0" 这个元素, 并根据这个元素的"PO #"去检索paid_Feb25.csv的"PO“列, 为"PO Line No.": "0"这个元素添加一个"paid“字段, 这个字段的值是检索的到的 paid_Feb25.csv文件的"Debit Amount“, 如果 paid_Feb25.csv中没有"PO“等于"PO Line No.": "0"的"PO #", 则将"paid“字段设置成 0.
+
+最后, 去掉fullSources.json数据源中的"success"字段和"totalRecords"字段,
+我需要新的字段,"Removals Dulplicate Line", 这个字段的值是删除的元素的数量. "POs Amounts", 这个字段的值是data数组的长度.
+"Empty Wow_Payment_Terms", 这个字段的值是"Wow_Payment_Terms"为空的元素的数量.
+"payment term conflict", 这个字段的值是"term_name" 和"Wow_Payment_Terms" 不相同的元素的数量.
+
+目前的fullSources.json 数据示例
+  {
+    "success": true,
+    "totalRecords": 3281,
+    "data": [
+      {
+        "As Of Date": "3/5/2025 4:04 am",
+        "Coordinator": "Shivangi Pradhan",
+        "Brand": "",
+        "Whse Internal ID": "1234",
+        "Warehouse": "Carrier to NA [Virtual]",
+        "Seller Account": "ChomChom US",
+        "Amazon Store Name": "ChomChom_US",
+        "Supplier": "Nippon Seal",
+        "Status": "Pending Supervisor Approval",
+        "PO #": "PO66707",
+        "Memo": "",
+        "Date Entered": "3/4/2025 7:58 am",
+        "ESTIMATED READY DATE": "",
+        "PO Line No.": "0",
+        "ASIN": "",
+        "SKU": "",
+        "Assembly SKU": "",
+        "Description": "",
+        "Quantity": "",
+        "Cost in USD": "",
+        "Cost in PO Currency": "",
+        "Currency": "USD",
+        "Estimated Ready Date / ERD": "",
+        "Early Pickup date": "",
+        "Late Pickup Date": "",
+        "Earliest Delivery Date": "",
+        "LATEST DELIVERY DATE": "",
+        "Quantity Received": "0",
+        "Quantity on Inbound Shipments": "",
+        "Supplier Shipping Country Code": "CN",
+        "Supplier Billing Country Code": "CN",
+        "Supplier Ship From Country Code (From PO)": "CN",
+        "Closed": false,
+        "Custom Form": "Thrasio SC Purchase Order",
+        "XPO Integration Status": "",
+        "Outbound Doc Sent to XPO Connect": "",
+        "Send to XPO Connect": false,
+        "ID": "N-CN-00071",
+        "Destination Type": "",
+        "INCOTERM": "",
+        "ARN#": "",
+        "FBA Shipment ID#": "",
+        "3PL FCID#": "",
+        "term_name": "Net 60",
+        "Wow_Payment_Terms": "Net 60",
+        "Deposit_Required": "0%",
+        "Prepay_G": "0%",
+        "Prepay_H": "0%",
+        "Net_Days": "60"
+      },
+      {
+        "As Of Date": "3/5/2025 4:04 am",
+        "Coordinator": "Shivangi Pradhan",
+        "Brand": "ChomChom Roller",
+        "Whse Internal ID": "1234",
+        "Warehouse": "Carrier to NA [Virtual]",
+        "Seller Account": "ChomChom US",
+        "Amazon Store Name": "ChomChom_US",
+        "Supplier": "Nippon Seal",
+        "Status": "Pending Supervisor Approval",
+        "PO #": "PO66707",
+        "Memo": "",
+        "Date Entered": "3/4/2025 7:58 am",
+        "ESTIMATED READY DATE": "",
+        "PO Line No.": "1",
+        "ASIN": "B0C2FMZMHP",
+        "SKU": "CCR-PET-ROLVR-BLK",
+        "Assembly SKU": "",
+        "Description": "ChomChom Roller - Black - Variation",
+        "Quantity": "40176",
+        "Cost in USD": "3.763",
+        "Cost in PO Currency": "3.763",
+        "Currency": "USD",
+        "Estimated Ready Date / ERD": "5/5/2025",
+        "Early Pickup date": "5/6/2025",
+        "Late Pickup Date": "5/13/2025",
+        "Earliest Delivery Date": "5/14/2025",
+        "LATEST DELIVERY DATE": "7/14/2025",
+        "Quantity Received": "0",
+        "Quantity on Inbound Shipments": "",
+        "Supplier Shipping Country Code": "CN",
+        "Supplier Billing Country Code": "CN",
+        "Supplier Ship From Country Code (From PO)": "CN",
+        "Closed": false,
+        "Custom Form": "Thrasio SC Purchase Order",
+        "XPO Integration Status": "",
+        "Outbound Doc Sent to XPO Connect": "",
+        "Send to XPO Connect": false,
+        "ID": "N-CN-00071",
+        "Destination Type": "",
+        "INCOTERM": "FOB",
+        "ARN#": "",
+        "FBA Shipment ID#": "",
+        "3PL FCID#": "",
+        "term_name": "Net 60",
+        "Wow_Payment_Terms": "Net 60",
+        "Deposit_Required": "0%",
+        "Prepay_G": "0%",
+        "Prepay_H": "0%",
+        "Net_Days": "60"
+      },
+    ]
+    }
+
+paid_Feb25.csv 数据示例
+PO,Debit Amount,Count
+PO100,22409.175,1
+PO10021,16228.8,1
+PO10022,4909.75,1
+PO10026,9234,1
+PO10031,13760.262,1
+PO10035,11868,1
+PO10036,10458,1
+PO10037,63439.6,1
+PO10038,64164.24,1
+PO10039,64164.24,1
+PO10041,6225.6,1
+PO10042,9887.4,1
+PO10043,195948.5,1
+PO10044,9101,1
+PO10045,1197.5,1
+PO10046,20520.96,1
+PO10047,398000,1
+PO10048,63291,1
+PO10049,7222.5,1
+PO10050,1798.038,1
+PO10051,4283.072,1
+PO10052,2940,1
+PO10053,3840,1
+PO10054,4320,1
+PO10059,5304,1
