@@ -294,3 +294,26 @@ PO10052,2940,1
 PO10053,3840,1
 PO10054,4320,1
 PO10059,5304,1
+
+
+
+很棒, 在输出文件之前, 我还需要再遍历一遍所有data数组的元素, 需要为每个元素生成和添加以下字段
+“Unpaid“ :“Balance” - “paid”
+"Deposit":{
+    Deposit Date : "Date Entered“+14天 的日期, 格式 month/day/year 如 "5/20/2025“
+    Deposit % Due : “Deposit_Required“
+    Deposit anchor:  "Deposit Date“ < 现在时间月份 ? “Past Due” : "<Current Month name, like Mar., Feb. Jan.)>” 
+    Deposit $ Due:  "Paid" > 0 ? 0 : <“Deposit % Due“ * “Balance”>
+}
+"Prepay":{
+  Prepay Date : "Estimated Ready Date / ERD“
+  Prepay % Due: “Prepay_H“
+  Prepay anchor: "Prepay Date“ < 现在时间月份 ? “Past Due” : "<Current Month name, like Mar., Feb. Jan.)>” 
+  Prepay $ Due: “Paid” ≤ 0 ? 0 : <“Prepay % Due“ * "Unpaid">
+}
+"Unpaid":{
+  Unpaid Date: “Estimated Ready Date / ERD“ + “Net_Days“
+  Unpaid % Due: 1 - “Deposit % Due” - “Prepay % Due“ (注意处理格式,“Prepay % Due“是字符串类型的百分比, 最终的结果应该也是字符串百分比)
+  Unpaid anchor: "Unpaid Date“ < 现在时间月份 ? “Past Due” : "<Current Month name, like Mar., Feb. Jan.)>” 
+  Unpaid $ Due: “Paid” ≤ 0 ? 0 : <Math.min(“unpaid % Due“ * “Balance”,"Unpaid“ )> 
+}
