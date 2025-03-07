@@ -472,3 +472,256 @@ maindata 示例响应
   "Empty Wow_Payment_Terms": 93,
   "payment term conflict": 365
 }
+
+
+请帮我写一个js程序,可以根据maindata对象的数据, 生成表格样式的html代码字符串,我需要利用这个字符串在别的地方渲染html文件, 具体要求如下.
+我的目的是统计以Supplier名为主键, 获取和累加所有数组元素内部"$ Due"值, 比如"<Unpaid or Deposit or Deposit> $ Due"
+表格生成逻辑如下, 遍历data里面的所有元素, 根据"Supplier"生成行名, 根据下面的逻辑匹配列名
+遍历该元素的"Unpaid" "Deposit" "Prepay"对象, 根据这个对象内部的anchor值, 也就是<Unpaid or Deposit or Deposit>中的"<Unpaid or Deposit or Deposit> anchor"的值匹配列名, 如
+案例 1:"Unpaid": {
+        "value": 151182.29,
+        "Unpaid Date": "7/4/2025",
+        "Unpaid % Due": "100%",
+        "Unpaid anchor": "Jul",
+        "Unpaid $ Due": 0
+      },
+应该匹配列名"2025_Jul - Unpaid"
+匹配成功后, 将这个"Supplier"行"2025_Jul - Unpaid"列的cell值设置为"Unpaid $ Due"的值
+
+案例 2:
+      "Deposit": {
+        "Deposit Date": "3/18/2025",
+        "Deposit % Due": "0%",
+        "Deposit anchor": "Mar",
+        "Deposit $ Due": 0
+      },
+应该匹配列名"2025_Mar - Deposit"
+匹配成功后, 将这个"Supplier"行"2025_Mar - Deposit"列的cell值设置为"Deposit $ Due"的值
+
+
+行名 : "Supplier"的值
+列数 = 4 + Remainingmonths*4,
+列名参考案例:
+"<Past Due - Deposit>","<Past Due - Prepay>","<Past Due - Unpaid>","<Past Due - Total>","<2025_Current month, example 2025_Mar>- Deposit" "<Current month> - Prepay" "<Current month>- Unpaid" "<Current month> - Total","<Current month + 1Month, example 2025_Apr> - Deposit" "<Current month + 1Month> - Prepay" "<Current month + 1Month>  - unpaid" "<Current month + 1Month> - Total","<Current month + 2Month, example 2025_Apr> - Deposit" "<Current month + 2Month> - Prepay" "<Current month + 1Month>  - unpaid" "<Current month + 2Month> - Total", ... "<Last month of this year, example 2025_Dec> - Deposit" "<Last month of this year> - Prepay" "<Last month of this year>  - unpaid" "<Last month of this year> - Total" 
+
+
+
+注意可能有多个data元都是同一个"Supplier",此时应该叠加对应行列的cell值
+
+
+Maindata对象数据案例如下
+{
+  "data": [
+    {
+      "As Of Date": "3/5/2025 4:04 am",
+      "Coordinator": "Shivangi Pradhan",
+      "Brand": "ChomChom Roller",
+      "Whse Internal ID": "1234",
+      "Warehouse": "Carrier to NA [Virtual]",
+      "Seller Account": "ChomChom US",
+      "Amazon Store Name": "ChomChom_US",
+      "Supplier": "Nippon Seal",
+      "Status": "Pending Supervisor Approval",
+      "PO #": "PO66707",
+      "Memo": "",
+      "Date Entered": "3/4/2025 7:58 am",
+      "ESTIMATED READY DATE": "",
+      "PO Line No.": "0,1",
+      "ASIN": "B0C2FMZMHP",
+      "SKU": "CCR-PET-ROLVR-BLK",
+      "Assembly SKU": "",
+      "Description": "ChomChom Roller - Black - Variation",
+      "Quantity": "40176",
+      "Cost in USD": "3.763",
+      "Cost in PO Currency": "3.763",
+      "Currency": "USD",
+      "Estimated Ready Date / ERD": "5/5/2025",
+      "Early Pickup date": "5/6/2025",
+      "Late Pickup Date": "5/13/2025",
+      "Earliest Delivery Date": "5/14/2025",
+      "LATEST DELIVERY DATE": "7/14/2025",
+      "Quantity Received": "0",
+      "Quantity on Inbound Shipments": "",
+      "Supplier Shipping Country Code": "CN",
+      "Supplier Billing Country Code": "CN",
+      "Supplier Ship From Country Code (From PO)": "CN",
+      "Closed": false,
+      "Custom Form": "Thrasio SC Purchase Order",
+      "XPO Integration Status": "",
+      "Outbound Doc Sent to XPO Connect": "",
+      "Send to XPO Connect": false,
+      "ID": "N-CN-00071",
+      "Destination Type": "",
+      "INCOTERM": "FOB",
+      "ARN#": "",
+      "FBA Shipment ID#": "",
+      "3PL FCID#": "",
+      "term_name": "Net 60",
+      "Wow_Payment_Terms": "Net 60",
+      "Deposit_Required": "0%",
+      "Prepay_G": "0%",
+      "Prepay_H": "0%",
+      "Net_Days": "60",
+      "Balance": "151182.29",
+      "paid": 0,
+      "Unpaid": {
+        "value": 151182.29,
+        "Unpaid Date": "7/4/2025",
+        "Unpaid % Due": "100%",
+        "Unpaid anchor": "Jul",
+        "Unpaid $ Due": 0
+      },
+      "Deposit": {
+        "Deposit Date": "3/18/2025",
+        "Deposit % Due": "0%",
+        "Deposit anchor": "Mar",
+        "Deposit $ Due": 0
+      },
+      "Prepay": {
+        "Prepay Date": "5/5/2025",
+        "Prepay % Due": "0%",
+        "Prepay anchor": "May",
+        "Prepay $ Due": 0
+      }
+    },
+    {
+      "As Of Date": "3/5/2025 4:04 am",
+      "Coordinator": "Shivangi Pradhan",
+      "Brand": "ChomChom Roller",
+      "Whse Internal ID": "1234",
+      "Warehouse": "Carrier to NA [Virtual]",
+      "Seller Account": "ChomChom US",
+      "Amazon Store Name": "ChomChom_US",
+      "Supplier": "Nippon Seal",
+      "Status": "Pending Supervisor Approval",
+      "PO #": "PO66706",
+      "Memo": "",
+      "Date Entered": "3/4/2025 7:19 am",
+      "ESTIMATED READY DATE": "",
+      "PO Line No.": "0,1",
+      "ASIN": "B0C2FMZMHP",
+      "SKU": "CCR-PET-ROLVR-BLK",
+      "Assembly SKU": "",
+      "Description": "ChomChom Roller - Black - Variation",
+      "Quantity": "40176",
+      "Cost in USD": "3.763",
+      "Cost in PO Currency": "3.763",
+      "Currency": "USD",
+      "Estimated Ready Date / ERD": "5/5/2025",
+      "Early Pickup date": "5/6/2025",
+      "Late Pickup Date": "5/13/2025",
+      "Earliest Delivery Date": "5/14/2025",
+      "LATEST DELIVERY DATE": "7/14/2025",
+      "Quantity Received": "0",
+      "Quantity on Inbound Shipments": "",
+      "Supplier Shipping Country Code": "CN",
+      "Supplier Billing Country Code": "CN",
+      "Supplier Ship From Country Code (From PO)": "CN",
+      "Closed": false,
+      "Custom Form": "Thrasio SC Purchase Order",
+      "XPO Integration Status": "",
+      "Outbound Doc Sent to XPO Connect": "",
+      "Send to XPO Connect": false,
+      "ID": "N-CN-00071",
+      "Destination Type": "",
+      "INCOTERM": "FOB",
+      "ARN#": "",
+      "FBA Shipment ID#": "",
+      "3PL FCID#": "",
+      "term_name": "Net 60",
+      "Wow_Payment_Terms": "Net 60",
+      "Deposit_Required": "0%",
+      "Prepay_G": "0%",
+      "Prepay_H": "0%",
+      "Net_Days": "60",
+      "Balance": "151182.29",
+      "paid": 0,
+      "Unpaid": {
+        "value": 151182.29,
+        "Unpaid Date": "7/4/2025",
+        "Unpaid % Due": "100%",
+        "Unpaid anchor": "Jul",
+        "Unpaid $ Due": 0
+      },
+      "Deposit": {
+        "Deposit Date": "3/18/2025",
+        "Deposit % Due": "0%",
+        "Deposit anchor": "Mar",
+        "Deposit $ Due": 0
+      },
+      "Prepay": {
+        "Prepay Date": "5/5/2025",
+        "Prepay % Due": "0%",
+        "Prepay anchor": "May",
+        "Prepay $ Due": 0
+      }
+    }, ],
+  "Removals Dulplicate Line": 2652,
+  "POs Amounts": 629,
+  "Empty Wow_Payment_Terms": 93,
+  "payment term conflict": 365
+}
+
+特别提醒,第一列的宽度应该大一些,当整个页面的宽度不够时, 第一列的宽度也要固定不变,不能被挤压
+样式可以参考下面的代码
+
+    <style>
+      /* 表格基础样式 */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+      }
+
+      /* 表头背景色为蓝色，文字为白色 */
+      thead tr {
+        background-color: #007bff;
+        color: #fff;
+        text-align: left;
+      }
+
+      /* 给表格加边框，增大列宽 */
+      th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+      }
+
+      /* 增加第一列宽度 */
+      th:first-child, td:first-child, {
+        width: 200px;
+      }
+
+      /* 交替行背景色，增加可读性 */
+      tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+
+      /* 悬停行高亮 */
+      tbody tr:hover {
+        background-color: #e9ecef;
+      }
+    </style>
+  
+特别注意 表格应该运行上下和左右滑动
+表格列宽应该固定, 第一列为 200px, 其他列为 30px
+表格的列名应该运行换行显示
+cell如果为 0 值, 则无需显示 0, 可以显示为空字符串
+Current月份需要根据系统时间动态生成.
+
+
+  YTD Mar Apr May Jun Jul Aug Sep Oct Nov Dec FY 25
+Total Budget  $13.92M $3.07M  $3.66M  $5.02M  $5.30M  $6.31M  $6.76M  $6.14M  $5.61M  $5.33M  $6.02M  $67.13M
+Open POs / AP outstanding                       
+Approved buy - US                       
+Approved buy - UK                       
+Approved buy - NPI                        
+Approved buy - Components                       
+Approved buy - BAM    
+                                       
+在刚刚代码的基础上, 再生成一个上面格式的html表格字符串, 要求如下
+1. 只修改Open POs / AP outstanding这一行的数据, 其他地方和数据不动. 添加的逻辑如下, 将刚刚最终结果的"Past Due - Total"列的数据全部累加,添加到YTD列; 将"Mar - Total"列全部累加,添加到Mar列; 将"Apr - Total"列... 依次类推. 
+2. 样式要求: 能否为下面这些行的表格单元的内部设置成一个可输入框? 然后这些行的行名称设置成紫色背景. Approved buy - US,Approved buy - UK,Approved buy - NPI,Approved buy - Components,Approved buy - BAM.
+另外, 帮我把Total Budget这一行的字体加粗. 帮我把Open POs / AP outstanding 表格单元数据转换成类似"$13.92M"的结构.
+
+
+
