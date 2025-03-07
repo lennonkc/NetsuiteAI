@@ -2,6 +2,7 @@ const https = require('follow-redirects').https;
 const fs = require('fs');
 const crypto = require('crypto');
 const OAuth = require('oauth-1.0a');
+const path = require("path");  // ✅ 引入 path 模块
 
 // 你的 NetSuite API 认证信息
 const CONSUMER_KEY = "53e93d8bf95714a0998acaaaf0605637069e3535c36b548604ee3cd3ef935810";
@@ -16,7 +17,10 @@ const API_URL = `https://${API_HOSTNAME}${API_PATH}`;
 // 获取当前时间并格式化为 MM_DD_HH_MM
 function getCurrentTime() {
     const now = new Date();
-    return `${String(now.getMonth() + 1).padStart(2, '0')}_${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}_${String(now.getMinutes()).padStart(2, '0')}`;
+    const month = now.toLocaleString('en-US', { month: 'short' }); // 获取英文缩写月份，如 "Mar"
+    const day = now.getDate(); // 获取日期，如 5
+
+    return `${month}_${day}`;
 }
 
 // 生成 OAuth 认证头
@@ -65,12 +69,19 @@ const req = https.request(options, function (res) {
 
     res.on("end", function () {
         const body = Buffer.concat(chunks).toString();
+        const privateDir = path.resolve(__dirname, "../../private");  // ✅ 计算 private 目录的绝对路径
+        const filePath = path.join(privateDir, filename);  // ✅ 目标文件路径
+
+        // 确保 private 目录存在
+        if (!fs.existsSync(privateDir)) {
+            fs.mkdirSync(privateDir, { recursive: true });
+        }
 
         // 将 JSON 解析并保存到文件
         try {
             const jsonData = JSON.parse(body); // 解析 JSON
-            fs.writeFileSync(filename, JSON.stringify(jsonData, null, 2), 'utf8');
-            console.log(`✅ 数据已保存到 ${filename}`);
+            fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2), "utf8");
+            console.log(`✅ 数据已保存到 ${filePath}`);
         } catch (error) {
             console.error("❌ JSON 解析失败:", error);
             console.error("❌ API 返回数据:", body);
