@@ -1,8 +1,14 @@
+// 根据Record_Mar_7.json文件中的ID字段，查询NetSuite中的供应商信息，并将term_name结果保存到VendorID_Month_Day.json文件中。
+// 1. 读取Record_Mar_7.json文件，提取所有的ID字段，组成VendorIDList。
+// 2. 构造SQL查询，查询NetSuite中的供应商信息,获取term_name。
+// 3. 将查询结果保存到VendorID_Month_Day.json文件中。
+
 const https = require('follow-redirects').https;
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const OAuth = require('oauth-1.0a');
+
 
 // 你的 NetSuite API 认证信息
 const CONSUMER_KEY = "53e93d8bf95714a0998acaaaf0605637069e3535c36b548604ee3cd3ef935810";
@@ -14,10 +20,13 @@ const API_HOSTNAME = `5377549-sb2.suitetalk.api.netsuite.com`;
 const API_PATH = "/services/rest/query/v1/suiteql";
 const API_URL = `https://${API_HOSTNAME}${API_PATH}`;
 
-// 获取当前时间并格式化为 MM_DD_HH_MM
+// 获取当前时间并格式化为 Month_Day
 function getCurrentTime() {
     const now = new Date();
-    return `${String(now.getMonth() + 1).padStart(2, '0')}_${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}_${String(now.getMinutes()).padStart(2, '0')}`;
+    const month = now.toLocaleString('en-US', { month: 'short' }); // 获取英文缩写月份，如 "Mar"
+    const day = now.getDate(); // 获取日期，如 5
+
+    return `${month}_${day}`;
 }
 
 // 生成 OAuth 认证头
@@ -44,7 +53,7 @@ function getOAuthHeader(method, url) {
 }
 
 // 读取 JSON 文件
-const inputFile = "Record03_05_15_18.json"; // 确保文件在当前目录
+const inputFile = "private/Record_Mar_7.json"; // 确保文件在当前目录
 const outputFile = `VendorID_${getCurrentTime()}.json`;
 
 try {
@@ -95,13 +104,15 @@ try {
 
         res.on("end", function () {
             const responseBody = Buffer.concat(chunks).toString();
+            const privateDir = path.resolve(__dirname, "../../private");  // ✅ 计算 private 目录的绝对路径
+            const filePath = path.join(privateDir, outputFile);  // ✅ 目标文件路径
 
             try {
                 const responseJson = JSON.parse(responseBody);
 
                 // 保存返回数据到 JSON 文件
-                fs.writeFileSync(outputFile, JSON.stringify(responseJson, null, 2), 'utf8');
-                console.log(`✅ 数据已保存到 ${outputFile}`);
+                fs.writeFileSync(filePath, JSON.stringify(responseJson, null, 2), 'utf8');
+                console.log(`✅ 数据已保存到 ${filePath}`);
             } catch (error) {
                 console.error("❌ API 返回的数据不是有效的 JSON:", responseBody);
             }

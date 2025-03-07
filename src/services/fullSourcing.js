@@ -3,11 +3,19 @@ const path = require('path');
 const csv = require('csv-parser');
 
 /** 配置部分：文件名 **/
-const sourceFile = "Record03_05_20_04.json";   // 初始采购订单数据
-const vendorFile = "VendorID_03_05_20_53.json"; // SuiteQL查询到的供应商数据
-const wowCsvFile = "WowTracking.csv";          // WOW Tracking CSV
-const paidCsvFile = "paid_Feb25.csv";          // PO 付款情况 CSV
-const outputFile = "fullSources.json";         // 最终输出文件
+const sourceFile = "private/Record_Mar_7.json";   // 初始采购订单数据
+const vendorFile = "private/VendorID_Mar_7.json"; // SuiteQL查询到的供应商数据
+const wowCsvFile = "private/WowTracking.csv";          // WOW Tracking CSV
+const paidCsvFile = "private/paid_Feb25.csv";          // PO 付款情况 CSV
+const outputFile = `private/fullSources_${getCurrentTime()}.json`;         // 最终输出文件
+
+function getCurrentTime() {
+  const now = new Date();
+  const month = now.toLocaleString('en-US', { month: 'short' }); // 获取英文缩写月份，如 "Mar"
+  const day = now.getDate(); // 获取日期，如 5
+
+  return `${month}_${day}`;
+}
 
 //--------------------------------------------------------------------
 // 1) 解析 WowTracking.csv
