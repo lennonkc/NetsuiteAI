@@ -8,16 +8,17 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const OAuth = require('oauth-1.0a');
+require('dotenv').config();
 
 
 // 你的 NetSuite API 认证信息
-const CONSUMER_KEY = "53e93d8bf95714a0998acaaaf0605637069e3535c36b548604ee3cd3ef935810";
-const CONSUMER_SECRET = "7995206a7a4269a5601e196444d4297a7fdacb5aa978385d129958856bbf37d2";
-const TOKEN_ID = "f9bdd95a9f4f2459c412cce3935ef459877e1d15b44c2803dce79adfbb7231bc";
-const TOKEN_SECRET = "643e22769cdbc15a8fe529d415c796bd5bd9d3da6385c4db3103916712a8ca80";
-const ACCOUNT_ID = "5377549_SB2";  // 例如 12345-sb2
-const API_HOSTNAME = `5377549-sb2.suitetalk.api.netsuite.com`;
-const API_PATH = "/services/rest/query/v1/suiteql";
+const CONSUMER_KEY = process.env.CONSUMER_KEY;
+const CONSUMER_SECRET = process.env.CONSUMER_SECRET;
+const TOKEN_ID = process.env.TOKEN_ID;
+const TOKEN_SECRET = process.env.TOKEN_SECRET;
+const ACCOUNT_ID = process.env.ACCOUNT_ID;
+const API_HOSTNAME = process.env.API_HOSTNAME;
+const API_PATH = process.env.API_PATH;
 const API_URL = `https://${API_HOSTNAME}${API_PATH}`;
 
 // 获取当前时间并格式化为 Month_Day
