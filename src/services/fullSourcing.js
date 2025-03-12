@@ -104,9 +104,9 @@ const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
 function getAnchor(date) {
   if (!date) return "";
   const now = new Date();
-  // 若 date < now => "Past Due"
+  // 若 date < now => "Past Due", 优化对比精度, 原是精确到秒和分的, 现在只比较年月.
   // 否则 => month name of date (本身的月份)
-  return date < now ? "Past Due" : monthNames[date.getMonth()];
+  return date.getMonth() < now.getMonth() ? "Past Due" : monthNames[date.getMonth()];
 }
 
 //--------------------------------------------------------------------
