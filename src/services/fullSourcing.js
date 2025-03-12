@@ -3,8 +3,8 @@ const path = require('path');
 const csv = require('csv-parser');
 
 /** 配置部分：文件名 **/
-const sourceFile = "private/Record_Mar_7.json";   // 初始采购订单数据
-const vendorFile = "private/VendorID_Mar_7.json"; // SuiteQL查询到的供应商数据
+const sourceFile = "private/Record_Mar_12.json";   // 初始采购订单数据
+const vendorFile = "private/VendorID_Mar_12.json"; // SuiteQL查询到的供应商数据
 const wowCsvFile = "private/WowTracking.csv";          // WOW Tracking CSV
 const paidCsvFile = "private/paid_Feb25.csv";          // PO 付款情况 CSV
 const outputFile = `private/fullSources_${getCurrentTime()}.json`;         // 最终输出文件

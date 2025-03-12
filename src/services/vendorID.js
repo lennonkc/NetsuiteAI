@@ -16,9 +16,9 @@ const CONSUMER_KEY = process.env.CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.CONSUMER_SECRET;
 const TOKEN_ID = process.env.TOKEN_ID;
 const TOKEN_SECRET = process.env.TOKEN_SECRET;
-const ACCOUNT_ID = process.env.ACCOUNT_ID;
-const API_HOSTNAME = process.env.API_HOSTNAME;
-const API_PATH = process.env.API_PATH;
+const ACCOUNT_ID = process.env.ACCOUNT_ID; 
+const API_HOSTNAME = process.env.API_HOSTNAME_SUITETALK;
+const API_PATH = process.env.API_PATH_SUITEQL;
 const API_URL = `https://${API_HOSTNAME}${API_PATH}`;
 
 // 获取当前时间并格式化为 Month_Day
