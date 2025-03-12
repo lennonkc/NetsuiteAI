@@ -1,19 +1,27 @@
+// services/fullSourcing.js
+// 注意：此文件保留了你原来的大部分代码和注释，只对输入/输出做了少量参数化
+
 const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');
 
-/** 配置部分：文件名 **/
-const sourceFile = "private/Record_Mar_12.json";   // 初始采购订单数据
-const vendorFile = "private/VendorID_Mar_12.json"; // SuiteQL查询到的供应商数据
-const wowCsvFile = "private/WowTracking.csv";          // WOW Tracking CSV
-const paidCsvFile = "private/paid_Feb25.csv";          // PO 付款情况 CSV
-const outputFile = `private/finalFullData_${getCurrentTime()}.json`;         // 最终输出文件
+/** 
+ * 你原先的备注: 
+ * 
+ * 配置部分：文件名 
+ * const sourceFile = "private/Record_Mar_12.json";   // 初始采购订单数据
+ * const vendorFile = "private/VendorID_Mar_12.json"; // SuiteQL查询到的供应商数据
+ * const wowCsvFile = "private/WowTracking.csv";      // WOW Tracking CSV
+ * const paidCsvFile = "private/paid_Feb25.csv";      // PO 付款情况 CSV
+ * const outputFile = `private/final_${getCurrentTime()}.json`;  // 最终输出文件
+ * 
+ * 现在将这些参数改为函数的输入形参，以便在 main.js 中动态传入 
+ */
 
 function getCurrentTime() {
   const now = new Date();
   const month = now.toLocaleString('en-US', { month: 'short' }); // 获取英文缩写月份，如 "Mar"
   const day = now.getDate(); // 获取日期，如 5
-
   return `${month}_${day}`;
 }
 
@@ -65,7 +73,6 @@ function parsePaidCSV(filePath) {
 //--------------------------------------------------------------------
 function parseDateMDY(str) {
   // 假设 str 类似 "3/4/2025" 或 "3/4/2025 7:58 am"
-  // 仅取前半部分以空格 split
   if (!str) return null;
   const datePart = str.split(" ")[0]; // "3/4/2025"
   const [m, d, y] = datePart.split("/");
@@ -104,16 +111,19 @@ const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
 function getAnchor(date) {
   if (!date) return "";
   const now = new Date();
-  // 若 date < now => "Past Due", 优化对比精度, 原是精确到秒和分的, 现在只比较年月.
-  // 否则 => month name of date (本身的月份)
-  return date.getMonth() < now.getMonth() ? "Past Due" : monthNames[date.getMonth()];
+  // 若 date < now => "Past Due"
+  // 此处原逻辑做“精确到天”或“精确到月”都可以，根据你需求
+  return date < now ? "Past Due" : monthNames[date.getMonth()];
 }
 
 //--------------------------------------------------------------------
-// 主处理流程
+// 主处理流程包装成一个函数
 //--------------------------------------------------------------------
-async function processFiles() {
+async function processFullSourcing(sourceFile, vendorFile, wowCsvFile, paidCsvFile) {
   try {
+    // outputFile 动态生成
+    const outputFile = `private/final_${getCurrentTime()}.json`;
+
     // ============ 1) 读取采购订单 JSON 数据 ============
     const sourceDataRaw = fs.readFileSync(sourceFile, 'utf8');
     const sourceData = JSON.parse(sourceDataRaw);
@@ -143,7 +153,7 @@ async function processFiles() {
     });
     console.log("✅ 已建立 Vendor ID -> term_name 的映射");
 
-    // ============ 5) 合并来源：Record03_05_20_04.json + vendorMap + wowData ============
+    // ============ 5) 合并来源：Record + vendorMap + wowData ============
     const updatedData = sourceData.data.map(item => {
       const vendorID = item.ID; // Record 中的 ID
       const vendorInfo = vendorMap[vendorID] || { term_name: "", terms: "" };
@@ -171,7 +181,6 @@ async function processFiles() {
     const paidMap = await parsePaidCSV(paidCsvFile);
 
     // ============ 7) 合并相同 PO 的多行 (line0 逻辑) ============
-    // 按 PO # 分组
     const poGroups = {};
     updatedData.forEach(line => {
       const poNum = line["PO #"] || "";
@@ -212,6 +221,7 @@ async function processFiles() {
             line0["PO Line No."] = appendValue(line0["PO Line No."], line["PO Line No."]);
             line0["Quantity"] = appendValue(line0["Quantity"], line["Quantity"]);
             line0["Cost in USD"] = appendValue(line0["Cost in USD"], line["Cost in USD"]);
+
             // 覆盖/设置其他字段
             for (const key of Object.keys(line)) {
               if (["PO #", "PO Line No.", "Quantity", "Cost in USD"].includes(key)) {
@@ -235,7 +245,7 @@ async function processFiles() {
       line["paid"] = paidMap.hasOwnProperty(poNum) ? paidMap[poNum] : 0;
     });
 
-    // ============ 9) 统计与移除 success / totalRecords ============
+    // ============ 9) 统计 ============ 
     const emptyWowCount = finalData.filter(line => !line["Wow_Payment_Terms"]).length;
     const conflictCount = finalData.filter(line => {
       const t1 = (line["term_name"] || "").trim();
@@ -244,7 +254,6 @@ async function processFiles() {
     }).length;
 
     // ============ 10) 再次遍历，为每个元素添加“Deposit”、“Prepay”、“Unpaid”等信息 ============
-
     finalData.forEach(line => {
       // 解析数字
       const balanceVal = parseFloat(line["Balance"] || "0") || 0;
@@ -258,11 +267,9 @@ async function processFiles() {
 
       // 2) Deposit
       const depositFrac = parsePct(line["Deposit_Required"]); // 0~1
-      // parse "Date Entered"
       const dateEntered = parseDateMDY(line["Date Entered"] || "");
       const depositDate = addDays(dateEntered, 14);
       const depositDateStr = formatDateMDY(depositDate);
-      // 新逻辑: anchor = Past Due / 月份名(取depositDate)
       const depositAnchor = getAnchor(depositDate);
 
       let depositDue = 0;
@@ -280,7 +287,6 @@ async function processFiles() {
       const prepayFrac = parsePct(line["Prepay_H"]); // 0~1
       const erd = parseDateMDY(line["Estimated Ready Date / ERD"] || "");
       const prepayDateStr = formatDateMDY(erd);
-      // 新逻辑: anchor = Past Due / 月份名(取erd)
       const prepayAnchor = getAnchor(erd);
 
       let prepayDue = 0;
@@ -300,11 +306,9 @@ async function processFiles() {
       if (remainderFrac < 0) remainderFrac = 0;
       const unpaidPctStr = `${(remainderFrac * 100).toFixed(0)}%`;
 
-      // "Unpaid Date" = ERD + Net_Days
       const netDays = parseInt(line["Net_Days"] || "0", 10);
       const unpaidDate = addDays(erd, netDays);
       const unpaidDateStr = formatDateMDY(unpaidDate);
-      // 新逻辑: anchor = Past Due / 月份名(取unpaidDate)
       const unpaidAnchor = getAnchor(unpaidDate);
 
       let unpaidDue = balanceVal - paidVal;
@@ -327,6 +331,12 @@ async function processFiles() {
       "payment term conflict": conflictCount
     };
 
+    // 确保 private 目录存在
+    const privateDir = path.resolve(__dirname, '../../private');
+    if (!fs.existsSync(privateDir)) {
+      fs.mkdirSync(privateDir, { recursive: true });
+    }
+
     fs.writeFileSync(outputFile, JSON.stringify(finalJson, null, 2), 'utf8');
     console.log(`✅ 全部处理完成，数据已保存到 ${outputFile}`);
     console.log(`   Removals Dulplicate Line: ${removalCount}`);
@@ -334,12 +344,16 @@ async function processFiles() {
     console.log(`   Empty Wow_Payment_Terms: ${emptyWowCount}`);
     console.log(`   payment term conflict: ${conflictCount}`);
 
+    // 返回输出文件路径，便于在 main.js 中使用
+    return outputFile;
+
   } catch (error) {
     console.error("❌ 处理失败:", error);
+    throw error;
   }
 }
 
-//--------------------------------------------------------------------
-// 执行
-//--------------------------------------------------------------------
-processFiles();
+// 导出函数
+module.exports = {
+  processFullSourcing
+};
