@@ -96,7 +96,8 @@ async function fetchVendorData(recordFilePath) {
     if (VendorIDList.length === 0) {
       throw new Error('没有找到任何有效的 Vendor ID');
     }
-    console.log('✅ 提取的 Vendor ID:', VendorIDList);
+    console.log('✅ 提取到了 Vendor ID:')
+    // console.log('✅ 提取到了 Vendor ID:', VendorIDList);
 
     // 构造 SQL 查询
     const sqlQuery = `

@@ -26,7 +26,7 @@ function getCurrentTime() {
 }
 
 //--------------------------------------------------------------------
-// 1) 解析 WowTracking.csv
+// 1) 解析 ptDefine.csv
 //--------------------------------------------------------------------
 function parseWowTrackingCSV(filePath) {
   return new Promise((resolve, reject) => {
@@ -34,13 +34,11 @@ function parseWowTrackingCSV(filePath) {
     fs.createReadStream(filePath)
       .pipe(csv())
       .on('data', (row) => {
-        // 这里取 "Vendor Code" 作为 VendorID
-        const vendorID = (row["Vendor Code"] || "").trim();
-        results[vendorID] = {
-          "Wow Payment Terms": row["Payment Terms"] || "",
+        // 这里取PT_Define 的Term Name作为result对象主键 
+        const vendorTermName = (row["Term Name"] || "").trim();
+        results[vendorTermName] = {
           "Deposit Required": row["Deposit Required"] || "",
-          "Prepay G": row["Prepay G"] || "",
-          "Prepay H": row["Prepay H"] || "",
+          "Prepay H": row["Prepay % (Due <= ERD)"] || "",
           "Net Days": row["Net Days (Due post ERD)"] || ""
         };
       })
@@ -153,28 +151,48 @@ async function processFullSourcing(sourceFile, vendorFile, wowCsvFile, paidCsvFi
     });
     console.log("✅ 已建立 Vendor ID -> term_name 的映射");
 
+    const emptyPTvendor = new Set();
+    const emptyPT_PO = new Set();
+    const undefinePT_vendor = new Set();
+    const undefinePT_PO = new Set();
+
     // ============ 5) 合并来源：Record + vendorMap + wowData ============
     const updatedData = sourceData.data.map(item => {
       const vendorID = item.ID; // Record 中的 ID
       const vendorInfo = vendorMap[vendorID] || { term_name: "", terms: "" };
-      const wowInfo = wowData[vendorID] || {
-        "Wow Payment Terms": "",
+      const vendorTermName = vendorInfo.term_name ; // Record 中的 term_name
+      const wowInfo = wowData[vendorTermName] || {
         "Deposit Required": "",
-        "Prepay G": "",
         "Prepay H": "",
         "Net Days": ""
       };
 
+      //记录没有term_name的vendor和PO
+      if (!vendorInfo.term_name) {
+        emptyPTvendor.add(item["Supplier"]);
+        emptyPT_PO.add(item["PO #"]);
+      }
+      //记录有term_name但是没有被PTDefine.csv定义的vendor和PO
+      if (vendorInfo.term_name && !wowInfo["Deposit Required"] && !wowInfo["Prepay H"] && !wowInfo["Net Days"]) {
+        undefinePT_vendor.add(item["Supplier"]+"("+vendorInfo.term_name+")");
+        undefinePT_PO.add(item["PO #"]+"("+vendorInfo.term_name+")");
+      }
+
       return {
         ...item,
-        term_name: vendorInfo.term_name,
-        Wow_Payment_Terms: wowInfo["Wow Payment Terms"],
+        term_name: vendorInfo.term_name,            //term_name 输出
+        // Wow_Payment_Terms: wowInfo["Wow Payment Terms"],
         Deposit_Required: wowInfo["Deposit Required"],
-        Prepay_G: wowInfo["Prepay G"],
+        // Prepay_G: wowInfo["Prepay G"],
         Prepay_H: wowInfo["Prepay H"],
         Net_Days: wowInfo["Net Days"]
       };
     });
+
+    console.log(`❌ 没有PT的供应商(数量${emptyPTvendor.size}个):\n`, emptyPTvendor,"\n");
+    console.log(`❌ 没有PT的PO(数量${emptyPT_PO.size}个):\n`, emptyPT_PO,"\n");
+    console.log(`❌ 有term_name但是没有被PTDefine.csv定义的vendor(数量${undefinePT_vendor.size}个)`,undefinePT_vendor,"\n");
+    console.log(`❌ 有term_name但是没有被PTDefine.csv定义的PO(数量${undefinePT_PO}个)`,undefinePT_PO,"\n")
 
     // ============ 6) 解析 paid_Feb25.csv ============ 
     console.log("📂 解析 paid_Feb25.csv...");

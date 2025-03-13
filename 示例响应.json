@@ -723,5 +723,10 @@ Approved buy - BAM
 2. 样式要求: 能否为下面这些行的表格单元的内部设置成一个可输入框? 然后这些行的行名称设置成紫色背景. Approved buy - US,Approved buy - UK,Approved buy - NPI,Approved buy - Components,Approved buy - BAM.
 另外, 帮我把Total Budget这一行的字体加粗. 帮我把Open POs / AP outstanding 表格单元数据转换成类似"$13.92M"的结构.
 
+wowTracking.csv 原列名
+Discount,Vendor Code,Vendor Name,Vendor,Payment Terms,Deposit Required,Prepay G,Prepay H,Net Days (Due post ERD)
 
+现列名
+Term Name,Deposit Required,Prepay % (Due <= ERD),Net Days (Due post ERD)
 
+原对应关系是根据每个记录的"ID"

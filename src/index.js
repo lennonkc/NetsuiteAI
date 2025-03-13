@@ -18,9 +18,9 @@ const { processFullSourcing } = require('./services/fullSourcing');
     // 第三步：进行 fullSourcing 流程（合并 CSV、Vendor、PO数据）
     // 这里 wowCsvFile、paidCsvFile 是你固定要处理的 CSV 文件
     console.log("▶ 3) Processing Full Sourcing...");
-    const wowCsvFile = "private/WowTracking.csv";
+    const ptDefineCsvFile = "private/PaymentTerm_define.csv";// 测试PT_Define文件
     const paidCsvFile = "private/paid_Feb25.csv";
-    const finalFilePath = await processFullSourcing(recordFilePath, vendorFilePath, wowCsvFile, paidCsvFile);
+    const finalFilePath = await processFullSourcing(recordFilePath, vendorFilePath, ptDefineCsvFile, paidCsvFile);
 
     console.log("✅ 所有操作完成！");
     console.log("   Record 文件路径:", recordFilePath);
