@@ -437,6 +437,51 @@ async function processFullSourcing(
       line["Unpaid"]["Unpaid $ Due"] = +unpaidDue.toFixed(2);
     });
 
+    // ============ 11) 为最终的json report删除非关键字段 ============
+    // 定义要删除的非关键字段列表
+    const fieldsToRemove = [
+      "As Of Date",
+      "Coordinator",
+      "Brand",
+      "Whse Internal ID",
+      "Warehouse",
+      "Seller Account",
+      "Amazon Store Name",
+      "Memo",
+      "ESTIMATED READY DATE",
+      "SKU",
+      "Assembly SKU",
+      "Description",
+      "Cost in PO Currency",
+      "Currency",
+      "Early Pickup date",
+      "Late Pickup Date",
+      "Earliest Delivery Date",
+      "LATEST DELIVERY DATE",
+      "Quantity Received",
+      "Quantity on Inbound Shipments",
+      "Supplier Shipping Country Code",
+      "Supplier Billing Country Code",
+      "Supplier Ship From Country Code (From PO)",
+      "Closed",
+      "Custom Form",
+      "XPO Integration Status",
+      "Outbound Doc Sent to XPO Connect",
+      "Send to XPO Connect",
+      "Destination Type",
+      "INCOTERM",
+      "ARN#",
+      "FBA Shipment ID#",
+      "3PL FCID#"
+    ];
+
+    // 删除指定字段
+    finalData.forEach(line => {
+      fieldsToRemove.forEach(field => {
+        delete line[field];
+      });
+    });
+
     // 最终结果
     const finalJson = {
       data: finalData,

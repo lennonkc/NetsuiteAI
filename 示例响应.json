@@ -937,6 +937,10 @@ poGroups的数据元素案例如下
     }
   ],
 
+
+
+
+  
 你做的很好,我现在需要继续优化逻辑.
 我修要修改原来的lines合并逻辑, 原来是以line=0 为主进行的合并, 现在我需要直接合并所有line, 也就是同一个PO的所有line都要合并, 新的合并的逻辑如下
 采取PO中line号码最小的line为修改对象, 也就是如果有多个line, 选择line号码最小的line, 作为修改对象, 然后将其他line的数据合并到这个修改对象中, 合并的逻辑如下
@@ -949,3 +953,48 @@ poGroups的数据元素案例如下
 再微调一下, 针对刚刚的逻辑的第 4 步和第 5 步, 我不需要直接对'Estimated Ready Date / ERD'进行拼接, 而是用一个新的字段"ERDs Conflict Details"来记录'Estimated Ready Date / ERD'的拼接结果.  我需要分情况处理,
 如果同一个PO的不同PO Line的 'Estimated Ready Date / ERD' 有冲突, 那么我需要将这些冲突的 'Estimated Ready Date / ERD' 值记录下来, 并且将这些值拼接成一个字段, 叫"ERDs Details", 用逗号分隔. 
 如果没有冲突, 那么将这个PO的"ERDs Conflict Details"值 设置为 空 ""
+
+
+
+
+
+怎么优化最终结果的输出? 
+const finalJson = {
+      data: finalData,
+      "Removals Dulplicate Line": removalCount,
+      "POs Amounts": finalData.length,
+      // "Empty Wow_Payment_Terms": emptyWowCount,
+      "Mutiple ERDs in same PO conflict": conflictERDsCount,
+    };
+finalData中的data数组元素是对象, 我不需要这些对象里面的下面这些字段"As Of Date" 
+"Coordinator" 
+"Brand" 
+"Whse Internal ID" 
+"Warehouse"  
+"Seller Account"   
+"Amazon Store Name" 
+"Memo" 
+"ESTIMATED READY DATE" 
+"SKU"  
+"Assembly SKU"   
+"Description" 
+"Cost in PO Currency" 
+"Currency" "Early Pickup date"  
+"Late Pickup Date"   
+"Earliest Delivery Date" 
+"LATEST DELIVERY DATE" 
+"Quantity Received" 
+"Quantity on Inbound Shipments" 
+"Supplier Shipping Country Code"
+"Supplier Billing Country Code"   
+"Supplier Ship From Country Code (From PO)"      
+"Closed"
+"Custom Form"
+"XPO Integration Status"    
+"Outbound Doc Sent to XPO Connect"
+"Send to XPO Connect"
+"Destination Type"
+"INCOTERM"
+"ARN#"
+"FBA Shipment ID#"
+"3PL FCID#"
