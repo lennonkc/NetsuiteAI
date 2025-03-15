@@ -168,8 +168,7 @@ async function processFullSourcing(
     });
     console.log("✅ 已建立 Vendor ID -> term_name 的映射");
 
-    const emptyPTvendor = new Set();
-    const emptyPT_PO = new Set();
+
     const undefinePT_vendor = new Set();
     const undefinePT_PO = new Set();
 
@@ -184,11 +183,6 @@ async function processFullSourcing(
         "Net Days": "",
       };
 
-      //记录没有term_name的vendor和PO
-      if (!vendorInfo.term_name) {
-        emptyPTvendor.add(item["Supplier"]);
-        emptyPT_PO.add(item["PO #"]);
-      }
       //记录有term_name但是没有被PTDefine.csv定义的vendor和PO
       if (
         vendorInfo.term_name &&
@@ -212,23 +206,6 @@ async function processFullSourcing(
         Net_Days: wowInfo["Net Days"],
       };
     });
-
-    console.log(
-      `❌ 没有PT的供应商(数量${emptyPTvendor.size}个):\n`,
-      emptyPTvendor,
-      "\n"
-    );
-    console.log(`❌ 没有PT的PO(数量${emptyPT_PO.size}个):\n`, emptyPT_PO, "\n");
-    console.log(
-      `❌ 有term_name但是没有被PTDefine.csv定义的vendor(数量${undefinePT_vendor.size}个)`,
-      undefinePT_vendor,
-      "\n"
-    );
-    console.log(
-      `❌ 有term_name但是没有被PTDefine.csv定义的PO(数量${undefinePT_PO}个)`,
-      undefinePT_PO,
-      "\n"
-    );
 
     // ============ 6) 解析 paid_Feb25.csv ============
     console.log("📂 解析 paid_Feb25.csv...");
@@ -261,9 +238,10 @@ async function processFullSourcing(
       // 1) 过滤掉 ERD 为空的行，打印出信息
       group = group.filter((line) => {
         if (!line["Estimated Ready Date / ERD"]) {
-          console.log(
-            `[Remove line => empty ERD] PO#: ${poNum}, line#: ${line["PO Line No."]}`
-          );
+          // 打印removed line
+          // console.log(
+          //   `[Remove line => empty ERD] PO#: ${poNum}, line#: ${line["PO Line No."]}`
+          // );
           return false;
         }
         return true;
@@ -279,12 +257,13 @@ async function processFullSourcing(
       const distinctERDs = [...new Set(allERDs)];
       const hasConflict = distinctERDs.length > 1;
 
-      if (hasConflict) {
-        console.log(
-          `[Conflict => multiple ERDs in PO#: ${poNum}]`,
-          distinctERDs.join(", ")
-        );
-      }
+      //打印出有冲突的lines的具体ERDs情况
+      // if (hasConflict) {
+      //   console.log(
+      //     `[Conflict => multiple ERDs in PO#: ${poNum}]`,
+      //     distinctERDs.join(", ")
+      //   );
+      // }
 
       // 3) 找到行号最小的那一行作为基准行
       let baseLine = group[0];
@@ -364,6 +343,7 @@ async function processFullSourcing(
 
     // ============ 9) 统计 ============
 
+    // 统计存在line冲突的PO数量
     const conflictERDsCount = finalData.filter((line) => {
       return line["multiple ERDs Conflict"]===true;
     }).length;
@@ -482,13 +462,30 @@ async function processFullSourcing(
       });
     });
 
+    //删除term_name为空的行，并记录其PO#与Supplier
+    const emptyTermNamePO = new Set();
+    const emptyTermNameVendor = new Set();
+    
+    // 过滤掉 term_name 为空的行，并记录其 PO # 与 Supplier
+    const removed_emptyPT_finalData =  finalData.filter(line => {
+      if (!line.term_name) {
+        emptyTermNamePO.add(line["PO #"] || "");
+        emptyTermNameVendor.add(line["Supplier"] || "");
+        return false; // 从 finalData 中移除
+      }
+      return true; // 保留
+    });
+
     // 最终结果
     const finalJson = {
-      data: finalData,
+      // data: finalData,
+      data: removed_emptyPT_finalData,
       "Removals Dulplicate Line": removalCount,
-      "POs Amounts": finalData.length,
-      // "Empty Wow_Payment_Terms": emptyWowCount,
-      "Mutiple ERDs in same PO conflict": conflictERDsCount,
+      "[POs total Amounts] - [POs unvalid Amounts] = POs valid Amounts": `[${finalData.length}] - [${emptyTermNamePO.size}] = ${removed_emptyPT_finalData.length}`,
+      "Empty Payment_Terms POs": [...emptyTermNamePO],
+      "Empty Payment_Terms Vendors": [...emptyTermNameVendor],
+      "Mutiple ERDs conflict PO Count": conflictERDsCount,
+      "Having Payment Term Value but not in PTDefine.csv Vendors": Array.from(undefinePT_vendor),
     };
 
     // 确保 private 目录存在
@@ -501,7 +498,7 @@ async function processFullSourcing(
     console.log(`✅ 全部处理完成，数据已保存到 ${outputFile}`);
     console.log(`   Removals Dulplicate Line: ${removalCount}`);
     console.log(`   POs Amounts: ${finalData.length}`);
-    console.log(` Mutiple ERDs in same PO conflict: ${conflictERDsCount}`);
+    console.log(`   Mutiple ERDs in same PO conflict: ${conflictERDsCount}`);
 
     // 返回输出文件路径，便于在 main.js 中使用
     return outputFile;
