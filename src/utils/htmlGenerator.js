@@ -1,3 +1,4 @@
+// 利用 final.json 的其他数据生成一个汇总报告
 function appendAggregatedDataDescription(maindata) {
   // 1) 取出剩余字段
   const duplicatesLine         = maindata["Removals Dulplicate Line"] || 0;
@@ -131,7 +132,7 @@ function appendAggregatedDataDescription(maindata) {
       </p>
 
       <p>
-        Overall, the data mismatch is expected to be around <strong>$${(errorEstimation / 1e6).toFixed(2)}M</strong>, 
+        Overall, the data mismatch is expected to be around <strong>$${(errorEstimation / 1e7 ).toFixed(2)}M</strong>, 
         which is sufficiently reliable for high-level financial decisions. 
         Please contact the Finance/Procurement team if you need further clarification.
       </p>
@@ -140,7 +141,6 @@ function appendAggregatedDataDescription(maindata) {
 
   return html;
 }
-
 
 //生成Merge表
 function generateMergeBudget(aggregatedData) {
@@ -379,10 +379,10 @@ function generateMergeBudget(aggregatedData) {
       width: 50px;
       min-width: 50px;
     }
-    /* 交替行颜色 */
-    // .merge-budget-table tbody tr:nth-child(even) {
-    //   background-color: #f8f9fa;
-    // }
+    /* 交替行颜色 
+    .merge-budget-table tbody tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }*/
     /* 紫色背景行 */
     .purple-row {
       background-color: #d9b3ff;
@@ -779,6 +779,14 @@ function generateHTMLTable(maindata) {
     `;
   const mergeBudgetHtml = generateMergeBudget(aggregatedData);
   return [html, mergeBudgetHtml];
+}
+
+// 获取当前时间并格式化为 Month_Day
+function getCurrentTime() {
+  const now = new Date();
+  const month = now.toLocaleString('en-US', { month: 'short' });
+  const day = now.getDate();
+  return `${month}_${day}`;
 }
 
 // 定义数据源
@@ -18200,12 +18208,12 @@ const maindata = {
 const summaryHtmlString = generateHTMLTable(maindata)[0];
 const mergedHtmlString = generateHTMLTable(maindata)[1]+appendAggregatedDataDescription(maindata);
 require("fs").writeFileSync(
-  "./public/summaryHtmlTable3.html",
+  `./public/html/vendorHtmlTable${getCurrentTime()}.html`,
   summaryHtmlString,
   "utf8"
 );
 require("fs").writeFileSync(
-  "./public/mergedTable3.html",
+  `./public/html/mergedTable${getCurrentTime()}.html`,
   mergedHtmlString,
   "utf8"
 );
