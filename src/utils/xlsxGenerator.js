@@ -139,15 +139,24 @@ function buildRecordSourcesSheetData(recordData) {
   return result;
 }
 
+/**
+ * 简单的 CSV 转 AOA (Array of Arrays) 函数
+ * 根据逗号拆分为二维数组，如果需要更高级的解析可以使用 csv-parse 等库
+ */
+function parseCsvToAoA(csvFilePath) {
+    const csvString = fs.readFileSync(csvFilePath, 'utf8');
+    // 将每行拆分为数组，再按逗号拆分列
+    return csvString
+      .split(/\r?\n/)
+      .map(line => line.split(','));
+  }
+
 (function main() {
   try {
-    // 1. 读取 JSON 文件
-    const vendorID_jsonPath = vendorID_json;
-    const recordSources_jsonPath = recordSources_json;
-
-    const vendorIDData = JSON.parse(fs.readFileSync(vendorID_jsonPath, "utf8"));
+    // 1. 读取 JSON 文件的数据
+    const vendorIDData = JSON.parse(fs.readFileSync(vendorID_json, "utf8"));
     const recordSourcesData = JSON.parse(
-      fs.readFileSync(recordSources_jsonPath, "utf8")
+      fs.readFileSync(recordSources_json, "utf8")
     );
 
     // 2. 生成 Vendor ID sheet 的 AOA 数据
@@ -156,11 +165,8 @@ function buildRecordSourcesSheetData(recordData) {
     const recordsSheetAoa = buildRecordSourcesSheetData(recordSourcesData);
 
     // 4. 解析 HTML 文件得到 AOA
-    const merge_htmlPath = merge_html;
-    const vendorReport_htmlPath = vendorReport_html;
-
-    const mergeBudgetAoa = parseHtmlFileToAoA(merge_htmlPath); // "Merge Budget"
-    const vendorPayPlanAoa = parseHtmlFileToAoA(vendorReport_htmlPath); // "Vendor Pay Plan"
+    const mergeBudgetAoa = parseHtmlFileToAoA(merge_html); // "Merge Budget"
+    const vendorPayPlanAoa = parseHtmlFileToAoA(vendorReport_html); // "Vendor Pay Plan"
 
     // 5. 创建工作簿并依次添加表格
     const workbook = xlsx.utils.book_new();
@@ -187,8 +193,19 @@ function buildRecordSourcesSheetData(recordData) {
 
     // full Records Source
     const recordsWS = xlsx.utils.aoa_to_sheet(recordsSheetAoa);
-    xlsx.utils.book_append_sheet(workbook, recordsWS, "full Records Source");
+    xlsx.utils.book_append_sheet(workbook, recordsWS, "full Open POs Records ");
 
+    /* CSV 文件转化 */
+    // 读取并解析 CSV -> AOA
+    const ptDefineData = parseCsvToAoA(ptDefine_csv);
+    const paidData = parseCsvToAoA(paid_csv);
+
+    // 转为 Worksheet 并附加到 Workbook
+    const ptDefineWS = xlsx.utils.aoa_to_sheet(ptDefineData);
+    xlsx.utils.book_append_sheet(workbook, ptDefineWS, "PT Define");
+
+    const paidWS = xlsx.utils.aoa_to_sheet(paidData);
+    xlsx.utils.book_append_sheet(workbook, paidWS, "Paid Data From Nick");
     // 6. 写出到 XLSX 文件
     const outputFile = `public/output${getCurrentTime()}.xlsx`;
     xlsx.writeFile(workbook, outputFile);

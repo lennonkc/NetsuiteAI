@@ -1,0 +1,76 @@
+
+      <style>
+        /* 可以与之前表格区分，也可公用类似样式 */
+        .merge-budget-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: Arial, sans-serif;
+        }
+  
+        .merge-budget-table thead tr {
+          background-color: #007bff;
+          color: #fff;
+          text-align: left;
+        }
+  
+        .merge-budget-table th, .merge-budget-table td {
+          border: 1px solid #ccc;
+          padding: 8px;
+          white-space: normal;
+          /* 固定列宽：第一列200px，其余50px */
+        }
+        .merge-budget-table th:first-child,
+        .merge-budget-table td:first-child {
+          width: 200px;
+        }
+        .merge-budget-table th:not(:first-child),
+        .merge-budget-table td:not(:first-child) {
+          width: 50px;
+          min-width: 50px;
+        }
+  
+        /* 让表格可横向滚动 */
+        .merge-budget-container {
+          width: 100%;
+          overflow-x: auto;
+        }
+  
+        /* 紫色背景行 */
+        .purple-row {
+          background-color: #d9b3ff; /* 或其他紫色 */
+        }
+
+        input {
+            border: none; /* 去除边框 */
+            background-color: #d9b3ff; /* 设置背景颜色为紫色 */
+            color: white; /* 让文本颜色变白，以提高可读性 */
+            padding: 5px; /* 添加一些内边距，使输入框更美观 */
+            outline: none; /* 去除点击时的默认外边框 */
+        }
+
+        /* 可根据需求自定义 input 样式 */
+        .merge-budget-table input[type="text"] {
+          width: 100%;
+          box-sizing: border-box;
+        }
+      </style>
+      <div class="merge-budget-container">
+        <table class="merge-budget-table">
+          <thead>
+            <tr>
+              <th></th>
+    <th>YTD</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th>FY 25</th></tr>
+          </thead>
+          <tbody>
+    <tr class=""><td style="font-weight:bold;">Total Budget</td><td style="font-weight:bold;">$13.92M</td><td style="font-weight:bold;">$3.07M</td><td style="font-weight:bold;">$3.66M</td><td style="font-weight:bold;">$5.02M</td><td style="font-weight:bold;">$5.30M</td><td style="font-weight:bold;">$6.31M</td><td style="font-weight:bold;">$6.76M</td><td style="font-weight:bold;">$6.14M</td><td style="font-weight:bold;">$5.61M</td><td style="font-weight:bold;">$5.33M</td><td style="font-weight:bold;">$6.02M</td><td style="font-weight:bold;">$67.13M</td></tr><tr class=""><td style="">Open POs / AP outstanding</td><td style="">$8.39M</td><td style="">$1.09M</td><td style="">$2.21M</td><td style="">$1.65M</td><td style="">$0.68M</td><td style="">$0.76M</td><td style="">$0.00M</td><td style="">$0.00M</td><td style="">$0.00M</td><td style="">$0.00M</td><td style="">$0.00M</td><td style="">$14.78M</td></tr><tr class="purple-row"><td style="">Approved buy - US</td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td></tr><tr class="purple-row"><td style="">Approved buy - UK</td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td></tr><tr class="purple-row"><td style="">Approved buy - NPI</td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td></tr><tr class="purple-row"><td style="">Approved buy - Components</td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td></tr><tr class="purple-row"><td style="">Approved buy - BAM</td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td><td><input type="text" value="" /></td></tr>
+          </tbody>
+        </table>
+      </div>
+    <h3> 
+    💥 Warning 💥 There are 93 records having unregonize "Payment_Terms" value
+    will cause the data not 100% correct.
+    <br>
+    😄 Accuracy assessment 😄 629 PO were analyzed, the accuracy expect to be 
+    <span style="font-size: 50px; font-weight: bold; color: #ff6600; text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5); font-family: 'Arial Black', sans-serif;"> 1-(93/629)=85% </span>
+    </h3>
+    

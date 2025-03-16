@@ -1,22 +1,8 @@
 // services/fullSourcing.js
-// 注意：此文件保留了你原来的大部分代码和注释，只对输入/输出做了少量参数化
 
 const fs = require("fs");
 const path = require("path");
 const csv = require("csv-parser");
-
-/**
- * 你原先的备注:
- *
- * 配置部分：文件名
- * const sourceFile = "private/Record_Mar_12.json";   // 初始采购订单数据
- * const vendorFile = "private/VendorID_Mar_12.json"; // SuiteQL查询到的供应商数据
- * const wowCsvFile = "private/WowTracking.csv";      // WOW Tracking CSV
- * const paidCsvFile = "private/paid_Feb25.csv";      // PO 付款情况 CSV
- * const outputFile = `private/final_${getCurrentTime()}.json`;  // 最终输出文件
- *
- * 现在将这些参数改为函数的输入形参，以便在 main.js 中动态传入
- */
 
 function getCurrentTime() {
   const now = new Date();
