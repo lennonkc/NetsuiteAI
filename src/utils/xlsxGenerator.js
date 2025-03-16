@@ -24,6 +24,7 @@ const ptDefine_csv = "private/PaymentTerm_define.csv";
 const paid_csv = "private/paid_Feb25.csv";
 const vendorID_json = "private/VendorID_Mar_16.json";
 const recordSources_json = "private/Record_Mar_16.json";
+const finaljson_path = "private/final_Mar_16.json";
 
 // 获取当前时间并格式化为 Month_Day
 function getCurrentTime() {
@@ -151,6 +152,99 @@ function parseCsvToAoA(csvFilePath) {
       .map(line => line.split(','));
   }
 
+/**
+ * 构建 finalJSON 对应的二维数组 (AOA)，并返回
+ * 其中:
+ *  第一行是合并多列的列名 (大标题行)：
+ *     - "PO Data" 合并 Supplier~ID 这10列
+ *     - "Payment Terms Define" 合并 term_name~Net_Days 这4列
+ *     - "Balance Data" 合并 Unpaid_Vaule~Unpaid $ Due 这5列
+ *     - "Deposit Data" 合并 Deposit_Date~Deposit $ Due 这4列
+ *     - "Prepay Data" 合并 Prepay Date~Prepay $ Due 这4列
+ *  第二行是各字段的具体列名
+ *  第三行及之后是 data 数组中的逐行数据
+ */
+function buildFinalSheetAoa(finalDataArray) {
+    // 大标题行(共31列) -- 先放置各段标题位置, 其余用 null 占位:
+    const headerRow1 = [
+      "PO Data", null, null, null, null, null, null, null, null, null, // 0..9
+      "Payment Terms Define", null, null, null,                        // 10..13
+      "Line_Values",                           // 14
+      "multiple ERDs Conflict",                                        // 15
+      "ERDs Conflict Details",                                          // 16
+      "paid",                                                           // 17
+      "Balance Data", null, null, null, null,                          // 18..22
+      "Deposit Data", null, null, null,                                // 23..26
+      "Prepay Data", null, null, null                                  // 27..30
+    ];
+  
+    // 第二行(31列): 具体列名
+    const headerRow2 = [
+      "Supplier", "Status", "PO #", "Date Entered", "PO Line No.", "ASIN", "Quantity",
+      "Cost in USD", "Estimated Ready Date / ERD", "ID",
+      "term_name", "Deposit_Required", "Prepay_H", "Net_Days",
+      "Line_Values", "multiple ERDs Conflict",
+      "ERDs Conflict Details", "paid",
+      "Unpaid_Vaule", "Unpaid Date", "Unpaid % Due", "Unpaid anchor", "Unpaid $ Due",
+      "Deposit_Date", "Deposit % Due", "Deposit anchor", "Deposit $ Due",
+      "Prepay Date", "Prepay % Due", "Prepay anchor", "Prepay $ Due"
+    ];
+  
+    // 准备存放表格的 AOA
+    const aoa = [];
+    aoa.push(headerRow1);
+    aoa.push(headerRow2);
+  
+    // 第三行开始: 填写 finalDataArray 中每个元素的数据
+    finalDataArray.forEach(item => {
+      // 注意：Unpaid, Deposit, Prepay 都是对象结构
+      //      未指定值时，要传空字符串
+      const row = [
+        item.Supplier || "",
+        item.Status || "",
+        item["PO #"] || "",
+        item["Date Entered"] || "",
+        item["PO Line No."] || "",
+        item.ASIN || "",
+        item.Quantity || "",
+        item["Cost in USD"] || "",
+        item["Estimated Ready Date / ERD"] || "",
+        item.ID || "",
+        item.term_name || "",
+        item.Deposit_Required || "",
+        item.Prepay_H || "",
+        item.Net_Days || "",
+        // 下面是 Balance 字段
+        item.Balance || "",
+        item["multiple ERDs Conflict"] !== undefined ? item["multiple ERDs Conflict"] : "",
+        item["ERDs Conflict Details"] || "",
+        item.paid !== undefined ? item.paid : "",
+        // Unpaid 相关
+        item.Unpaid?.value !== undefined ? item.Unpaid.value : "",
+        item.Unpaid?.["Unpaid Date"] || "",
+        item.Unpaid?.["Unpaid % Due"] || "",
+        item.Unpaid?.["Unpaid anchor"] || "",
+        item.Unpaid?.["Unpaid $ Due"] !== undefined ? item.Unpaid["Unpaid $ Due"] : "",
+        // Deposit
+        item.Deposit?.["Deposit Date"] || "",
+        item.Deposit?.["Deposit % Due"] || "",
+        item.Deposit?.["Deposit anchor"] || "",
+        item.Deposit?.["Deposit $ Due"] !== undefined ? item.Deposit?.["Deposit $ Due"] : "",
+        // Prepay
+        item.Prepay?.["Prepay Date"] || "",
+        item.Prepay?.["Prepay % Due"] || "",
+        item.Prepay?.["Prepay anchor"] || "",
+        item.Prepay?.["Prepay $ Due"] !== undefined ? item.Prepay?.["Prepay $ Due"] : ""
+      ];
+      aoa.push(row);
+    });
+  
+    return aoa;
+  }
+  
+
+
+
 (function main() {
   try {
     // 1. 读取 JSON 文件的数据
@@ -194,6 +288,36 @@ function parseCsvToAoA(csvFilePath) {
     // full Records Source
     const recordsWS = xlsx.utils.aoa_to_sheet(recordsSheetAoa);
     xlsx.utils.book_append_sheet(workbook, recordsWS, "full Open POs Records ");
+
+    /* Final Calculator 数据转换*/
+     // 读取 final_Mar_16.json 的数据
+    const finalJsonRaw = JSON.parse(fs.readFileSync(finaljson_path, 'utf8'));
+    // 这里只需 "data" 数组部分
+    const finalJsonDataArray = finalJsonRaw.data || [];
+
+    // 将其转换为二维数组 (AOA)
+    const finalSheetAoa = buildFinalSheetAoa(finalJsonDataArray);
+
+    // 先把二维数组转成 Worksheet
+    const finalWS = xlsx.utils.aoa_to_sheet(finalSheetAoa);
+
+    // 设置首行单元格合并
+    // 注意：以 {s:{r,c}, e:{r,c}} 表示起点(行,列)到终点(行,列)（从 0 开始计数）
+    finalWS['!merges'] = [
+    // "PO Data": columns 0..9, row 0
+    { s: {r:0, c:0},  e: {r:0, c:9} },
+    // "Payment Terms Define": columns 10..13
+    { s: {r:0, c:10}, e: {r:0, c:13} },
+    // "Balance Data": columns 18..22
+    { s: {r:0, c:18}, e: {r:0, c:22} },
+    // "Deposit Data": columns 23..26
+    { s: {r:0, c:23}, e: {r:0, c:26} },
+    // "Prepay Data": columns 27..30
+    { s: {r:0, c:27}, e: {r:0, c:30} }
+    ];
+
+    // 将 Worksheet 添加到工作簿
+    xlsx.utils.book_append_sheet(workbook, finalWS, "Calculator Records"); 
 
     /* CSV 文件转化 */
     // 读取并解析 CSV -> AOA

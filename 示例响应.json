@@ -1080,6 +1080,9 @@ Additionally, because the Paid PO could not be automatically retrieved, this wil
 
 
 
+
+
+
 mergehtml -> excel sheet1
 vendorhtml -> excel sheet2
 PT define -> excel sheet3
@@ -1094,6 +1097,17 @@ const ptDefine_csv = "private/PaymentTerm_define.csv";
 const paid_csv = "private/paid_Feb25.csv";
 const vendorID_json = "private/VendorID_Mar_16.json";
 const recordSources_json = "private/Record_Mar_16.json";
+
+我的项目目前是基于node.js的, 帮我写一个JavaScript的代码, 转换下面的两个json结构为一个xlsx文件, 其中一个json结构占用xlsx的一个sheet, sheet的名称分别为vendor ID, full Records Source
+
+对于vendorID_json, 只需要使用"count"和"items"
+第一行是"count","count的Value"
+第二行是列名行, 列名为每个item内部的key name, 有"companyname","entityid","id","term_name","terms"
+第三行开始就是每个item对应第二行的Value值
+
+对于recordSources_json同理,只需要使用"totalRecords"和"data"
+
+数据源案例如下
 
 vendorID_json数据示例
 {
@@ -1621,3 +1635,129 @@ vendorReport_html数据示例
 </div>
 
 ]
+
+
+下面有一个数据结构finaljson_path, 请指使用"data"中的数组数据, 生成一个表格, 表格中的列为:
+第一行是合并多列的列名, 为第二列的Supplier, Status, PO #, Date Entered, PO Line No., ASIN, Quantity, Cost in USD, Estimated Ready Date / ERD, ID的列做一个合并列名"PO Data" ;为第二列的term_name, Deposit_Required, Prepay_H, Net_Days的列做一个合并列名, 为"Payment Terms Define"; 为Unpaid_Vaule, Unpaid Date, Unpaid % Due, Unpaid anchor, Unpaid $ Due做一个合并列名 "Balance Data"; 为Deposit_Date, Deposit % Due, Deposit anchor, Deposit $ Due做一个合并列名 "Deposit Data"; 为Prepay Date, Prepay % Due, Prepay anchor, Prepay $ Due做一个合并列名 "Prepay Data"
+
+第二行是单列的列名: Supplier, Status, PO #, Date Entered, PO Line No., ASIN, Quantity, Cost in USD, Estimated Ready Date / ERD, ID, term_name, Deposit_Required, Prepay_H, Net_Days, Line_Values(实际值为Data中的Balance), multiple ERDs Conflict, ERDs Conflict Details, paid, Unpaid_Vaule, Unpaid Date, Unpaid % Due, Unpaid anchor, Unpaid $ Due, Deposit_Date, Deposit % Due, Deposit anchor, Deposit $ Due, Prepay Date, Prepay % Due, Prepay anchor, Prepay $ Due
+
+第三行开始为数据行, 请按照第二行的列名去读取每个数组元素并生成表格
+
+const finaljson_path = "private/final_Mar_16.json";
+数据案例如下:
+{
+  "data": [
+    {
+      "Supplier": "Nippon Seal",
+      "Status": "Pending Supervisor Approval",
+      "PO #": "PO66707",
+      "Date Entered": "3/4/2025 7:58 am",
+      "PO Line No.": "1",
+      "ASIN": "B0C2FMZMHP",
+      "Quantity": "40176",
+      "Cost in USD": "3.763",
+      "Estimated Ready Date / ERD": "5/5/2025",
+      "ID": "N-CN-00071",
+      "term_name": "Net 60",
+      "Deposit_Required": "0%",
+      "Prepay_H": "0%",
+      "Net_Days": "60",
+      "Balance": "151182.29",
+      "multiple ERDs Conflict": false,
+      "ERDs Conflict Details": "",
+      "paid": 0,
+      "Unpaid": {
+        "value": 151182.29,
+        "Unpaid Date": "7/4/2025",
+        "Unpaid % Due": "100%",
+        "Unpaid anchor": "Jul",
+        "Unpaid $ Due": 151182.29
+      },
+      "Deposit": {
+        "Deposit Date": "3/18/2025",
+        "Deposit % Due": "0%",
+        "Deposit anchor": "Mar",
+        "Deposit $ Due": 0
+      },
+      "Prepay": {
+        "Prepay Date": "5/5/2025",
+        "Prepay % Due": "0%",
+        "Prepay anchor": "May",
+        "Prepay $ Due": 0
+      }
+    },
+    {
+      "Supplier": "Nippon Seal",
+      "Status": "Pending Supervisor Approval",
+      "PO #": "PO66706",
+      "Date Entered": "3/4/2025 7:19 am",
+      "PO Line No.": "1",
+      "ASIN": "B0C2FMZMHP",
+      "Quantity": "40176",
+      "Cost in USD": "3.763",
+      "Estimated Ready Date / ERD": "5/5/2025",
+      "ID": "N-CN-00071",
+      "term_name": "Net 60",
+      "Deposit_Required": "0%",
+      "Prepay_H": "0%",
+      "Net_Days": "60",
+      "Balance": "151182.29",
+      "multiple ERDs Conflict": false,
+      "ERDs Conflict Details": "",
+      "paid": 0,
+      "Unpaid": {
+        "value": 151182.29,
+        "Unpaid Date": "7/4/2025",
+        "Unpaid % Due": "100%",
+        "Unpaid anchor": "Jul",
+        "Unpaid $ Due": 151182.29
+      },
+      "Deposit": {
+        "Deposit Date": "3/18/2025",
+        "Deposit % Due": "0%",
+        "Deposit anchor": "Mar",
+        "Deposit $ Due": 0
+      },
+      "Prepay": {
+        "Prepay Date": "5/5/2025",
+        "Prepay % Due": "0%",
+        "Prepay anchor": "May",
+        "Prepay $ Due": 0
+      }
+    }
+   ],
+  "Removals Dulplicate Line": 1381,
+  "[POs total Amounts] - [POs unvalid Amounts] = POs valid Amounts": "[460] - [17] = 443",
+  "Empty Payment_Terms POs": [
+    "PO66534",
+    "PO66453",
+    "PO66321",
+    "PO66316",
+    "PO66030",
+    "PO65636",
+    "PO65288",
+    "PO65271",
+    "PO65269",
+    "PO65268",
+    "PO65043",
+    "PO64693",
+    "PO64611",
+    "PO64554",
+    "PO64387",
+    "PO63408",
+    "PO62598"
+  ],
+  "Empty Payment_Terms Vendors": [
+    "MediaPrint EK Ltd",
+    "Shandong Honghan International Trading Co",
+    "OPM Group",
+    "Ambrose Continental, LLC dba Hudson Associates",
+    "Container and Packaging",
+    "Jieyang Fengxing Stainless Steel Products Co., Ltd.",
+    "Xinlehong Toys Factory"
+  ],
+  "Mutiple ERDs conflict PO Count": 59,
+  "Error Estimation Due To Line Conflicts": "487156.29",
+  "Having Payment Term Value but not in PTDefine.csv Vendors": []
+}
