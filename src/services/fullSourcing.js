@@ -350,7 +350,7 @@ async function processFullSourcing(
 
     // ============ 10) 再次遍历，为每个元素添加“Deposit”、“Prepay”、“Unpaid”等信息 ============
     finalData.forEach((line) => {
-      // 解析数字
+      // 解析数字, 这里的Balance是整个PO所有Lines的 QTY*Cost, 相当于excel中的 Line Value
       const balanceVal = parseFloat(line["Balance"] || "0") || 0;
       const paidVal = parseFloat(line["paid"] || "0") || 0;
 
@@ -406,9 +406,9 @@ async function processFullSourcing(
       const unpaidDateStr = formatDateMDY(unpaidDate);
       const unpaidAnchor = getAnchor(unpaidDate);
 
-      let unpaidDue = balanceVal - paidVal;
-      if (paidVal > 0) {
-        const portion = remainderFrac * balanceVal;
+      let unpaidDue = 0;
+      if (unpaidVal > 0) {
+        const portion = remainderFrac * unpaidVal;
         unpaidDue = Math.min(portion, unpaidVal);
       }
       line["Unpaid"]["Unpaid Date"] = unpaidDateStr;
