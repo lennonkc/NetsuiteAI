@@ -477,15 +477,24 @@ async function processFullSourcing(
       return true; // 保留
     });
 
+    // 计算因为 line 冲突导致的误差估计
+    let ErrorEstimationDueToLineConflicts = 0;
+    removed_emptyPT_finalData.forEach(line => {
+      if (line["multiple ERDs Conflict"] === true) {
+        ErrorEstimationDueToLineConflicts += line["Unpaid"]["Unpaid $ Due"]*0.2;
+      }
+    }
+    );
+
     // 最终结果
     const finalJson = {
-      // data: finalData,
       data: removed_emptyPT_finalData,
       "Removals Dulplicate Line": removalCount,
       "[POs total Amounts] - [POs unvalid Amounts] = POs valid Amounts": `[${finalData.length}] - [${emptyTermNamePO.size}] = ${removed_emptyPT_finalData.length}`,
       "Empty Payment_Terms POs": [...emptyTermNamePO],
       "Empty Payment_Terms Vendors": [...emptyTermNameVendor],
       "Mutiple ERDs conflict PO Count": conflictERDsCount,
+      "Error Estimation Due To Line Conflicts": ErrorEstimationDueToLineConflicts.toFixed(2),
       "Having Payment Term Value but not in PTDefine.csv Vendors": Array.from(undefinePT_vendor),
     };
 
