@@ -236,8 +236,9 @@ async function processFullSourcing(
       let group = poGroups[poNum];
 
       // 1) 过滤掉 ERD 为空的行，打印出信息
+      // 过滤掉close为true的行
       group = group.filter((line) => {
-        if (!line["Estimated Ready Date / ERD"]) {
+        if (!line["Estimated Ready Date / ERD"] || line["Closed"] === true) {
           // 打印removed line
           // console.log(
           //   `[Remove line => empty ERD] PO#: ${poNum}, line#: ${line["PO Line No."]}`
@@ -495,10 +496,10 @@ async function processFullSourcing(
     }
 
     fs.writeFileSync(outputFile, JSON.stringify(finalJson, null, 2), "utf8");
-    console.log(`✅ 全部处理完成，数据已保存到 ${outputFile}`);
-    console.log(`   Removals Dulplicate Line: ${removalCount}`);
-    console.log(`   POs Amounts: ${finalData.length}`);
-    console.log(`   Mutiple ERDs in same PO conflict: ${conflictERDsCount}`);
+    // console.log(`✅ 全部处理完成，数据已保存到 ${outputFile}`);
+    // console.log(`   Removals Dulplicate Line: ${removalCount}`);
+    // console.log(`   POs Amounts: ${finalData.length}`);
+    // console.log(`   Mutiple ERDs in same PO conflict: ${conflictERDsCount}`);
 
     // 返回输出文件路径，便于在 main.js 中使用
     return outputFile;
