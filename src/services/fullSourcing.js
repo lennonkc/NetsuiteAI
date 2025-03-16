@@ -481,7 +481,7 @@ async function processFullSourcing(
     let ErrorEstimationDueToLineConflicts = 0;
     removed_emptyPT_finalData.forEach(line => {
       if (line["multiple ERDs Conflict"] === true) {
-        ErrorEstimationDueToLineConflicts += line["Unpaid"]["Unpaid $ Due"]*0.2;
+        ErrorEstimationDueToLineConflicts += line["Unpaid"]["Unpaid $ Due"]*0.1;
       }
     }
     );
