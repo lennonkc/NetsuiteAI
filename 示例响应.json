@@ -1,3 +1,5 @@
+git push --force origin main      // 强制推送到远程仓库
+
 很棒, 你做的很好,请帮我写一个新的js文件,fullSourceing.js. 我现在有两个json文件, 第一个json文件中的data数组元素中的"ID"指的就是第二个JSON文件中的"entityid".
 请帮我遍历第一个数组文件中的data数组, 并且为每个数组元素根据"ID"检索"entityid", 然后为这个元素增加一个"term_name", 如果无法找到对应的"term_name", 则应该将"term_name"设置为空"".
 最后将处理后的数据保存到一个新的json文件中, 文件名为 fullSources.json
