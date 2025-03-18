@@ -5,6 +5,7 @@ function appendAggregatedDataDescription(maindata) {
   // const pOsValidCalc           = maindata["[POs total Amounts] - [POs unvalid Amounts] = POs valid Amounts"] || "";
   const emptyPaymentTermsPOs   = maindata["Empty Payment_Terms POs"] || [];
   const emptyPaymentTermsVendors = maindata["Empty Payment_Terms Vendors"] || [];
+  const undefinePT_AmountEffected = maindata["undefinePT_AmountEffected"];
   // const multipleERDsConflictPOCount = maindata["Mutiple ERDs conflict PO Count"] || 0;
   // const errorEstimation        = parseFloat(maindata["Error Estimation Due To Line Conflicts"] || 0);
   const havingPaymentTermNotInPTDefine = maindata["Having Payment Term Value but not in PTDefine.csv Vendors"] || [];
@@ -102,7 +103,9 @@ function appendAggregatedDataDescription(maindata) {
         <li><strong>Empty Payment_Terms Vendors:</strong> 
           ${emptyPaymentTermsVendors.length ? emptyPaymentTermsVendors.join(", ") : "None"}</li>
       </ul>
-
+      <p>
+        The effected amount is <strong class="highlight">${undefinePT_AmountEffected}</strong>.
+      </p>
       <p>
         Additionally, the following vendors have Payment Term values 
         not present in our <em>PTDefine.csv</em> reference:
@@ -68984,6 +68987,7 @@ const maindata = {
     }
   ],
   "totalLines": 1795,
+  "undefinePT_AmountEffected": "$ 0.47M",
   "Empty Payment_Terms POs": [
     "PO66534",
     "PO66453",
@@ -69014,6 +69018,7 @@ const maindata = {
   ],
   "Having Payment Term Value but not in PTDefine.csv Vendors": []
 };
+
 
 const summaryHtmlString = generateHTMLTable(maindata)[0];
 const mergedHtmlString = generateHTMLTable(maindata)[1]+appendAggregatedDataDescription(maindata);

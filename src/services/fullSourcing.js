@@ -173,6 +173,7 @@ async function processFullSourcing(sourceFile, vendorFile, wowCsvFile, paidCsvFi
     // 用于记录在 ptDefine.csv 中未匹配到定义的供应商
     const undefinePT_vendor = new Set();
     const undefinePT_PO = new Set();
+    let undefinePT_AmountEffected = 0;
 
     // ============ 5) 合并来源：Record + vendorMap + wowData ============
     //    此时还不做 Lines 合并，每条 line 都保留
@@ -197,6 +198,15 @@ async function processFullSourcing(sourceFile, vendorFile, wowCsvFile, paidCsvFi
         undefinePT_vendor.add(item["Supplier"] + "(" + vendorInfo.term_name + ")");
         undefinePT_PO.add(item["PO #"] + "(" + vendorInfo.term_name + ")");
       }
+
+      // undefinePT_AmountEffected += item["Quantity"]*item["Cost in USD"];
+      if (
+        (vendorInfo.term_name && !wowInfo["Deposit Required"] && !wowInfo["Prepay H"] && !wowInfo["Net Days"]) || (!vendorInfo.term_name)
+      ){
+        undefinePT_AmountEffected += item["Quantity"]*item["Cost in USD"];
+        // console.log("adding undefinePT_AmountEffected amount: ", item["Quantity"]*item["Cost in USD"]);
+      }
+
 
       // 计算每行的初始 Balance = QTY * Cost in USD
       // 在后面会改名为 "Line_Values"
@@ -290,8 +300,7 @@ async function processFullSourcing(sourceFile, vendorFile, wowCsvFile, paidCsvFi
     });
 
     // ============ 9) 统计 / 其他报告相关 ============
-    // 目前不再有 multiple ERDs Conflict 或 ERDs Conflict Details，所以相关逻辑删除
-    // 统计信息若需要可自行扩展
+
 
     // ============ 10) 对每行再计算 Deposit / Prepay / Unpaid ============
     // 现在所有押金、预付款、未付款的基准都用 "Line_Values"
@@ -423,6 +432,7 @@ async function processFullSourcing(sourceFile, vendorFile, wowCsvFile, paidCsvFi
     const finalJson = {
       data: finalData,
       "totalLines": finalData.length,
+      "undefinePT_AmountEffected": `$ ${(undefinePT_AmountEffected/1e6).toFixed(2)}M`,
       "Empty Payment_Terms POs": [...emptyTermNamePO],
       "Empty Payment_Terms Vendors": [...emptyTermNameVendor],
       "Having Payment Term Value but not in PTDefine.csv Vendors": Array.from(undefinePT_vendor),

@@ -18,13 +18,13 @@ const fs = require("fs");
 const xlsx = require("xlsx");
 const cheerio = require("cheerio");
 
-const merge_html = "./public/html/mergedTableMar_16.html";
-const vendorReport_html = "./public/html/vendorHtmlTableMar_16.html";
+const merge_html = "./public/html/mergedTableMar_18.html";
+const vendorReport_html = "./public/html/vendorHtmlTableMar_18.html";
 const ptDefine_csv = "private/PaymentTerm_define.csv";
 const paid_csv = "private/paid_Feb25.csv";
-const vendorID_json = "private/VendorID_Mar_17.json";
-const recordSources_json = "private/Record_Mar_17.json";
-const finaljson_path = "private/final_Mar_17.json";
+const vendorID_json = "private/VendorID_Mar_18.json";
+const recordSources_json = "private/Record_Mar_18.json";
+const finaljson_path = "private/final_Mar_18.json";
 
 // 获取当前时间并格式化为 Month_Day
 function getCurrentTime() {
@@ -164,83 +164,124 @@ function parseCsvToAoA(csvFilePath) {
  *  第二行是各字段的具体列名
  *  第三行及之后是 data 数组中的逐行数据
  */
+/**
+ * 根据新的数据结构，构建适合导出至 XLSX 的二维数组 (AOA)。
+ * 1) 第一行是大标题行，带合并单元格，用于分组。
+ * 2) 第二行是字段名（共30列）。
+ * 3) 第三行起是 data 数组的逐条记录。
+ */
 function buildFinalSheetAoa(finalDataArray) {
-    // 大标题行(共31列) -- 先放置各段标题位置, 其余用 null 占位:
-    const headerRow1 = [
-      "PO Data", null, null, null, null, null, null, null, null, null, // 0..9
-      "Payment Terms Define", null, null, null,                        // 10..13
-      "Line_Values",                           // 14
-      "multiple ERDs Conflict",                                        // 15
-      "ERDs Conflict Details",                                          // 16
-      "paid",                                                           // 17
-      "Balance Data", null, null, null, null,                          // 18..22
-      "Deposit Data", null, null, null,                                // 23..26
-      "Prepay Data", null, null, null                                  // 27..30
+  // =========== 第一行: 大标题行, 带合并 ===========
+  // 共 30 列: 0..9 => "PO Data", 10..13 => "Payment Terms Define",
+  //           14..15 => "Line Data", 16 => "paid",
+  //           17..21 => "Unpaid Data", 22..25 => "Deposit Data",
+  //           26..29 => "Prepay Data"
+  const headerRow1 = [
+    "PO Data", null, null, null, null, null, null, null, null, null,    // cols 0..9
+    "Payment Terms Define", null, null, null,                           // cols 10..13
+    "Line Data", null,                                                  // cols 14..15
+    "paid",                                                             // col 16 (无合并)
+    "Unpaid Data", null, null, null, null,                              // cols 17..21
+    "Deposit Data", null, null, null,                                   // cols 22..25
+    "Prepay Data", null, null, null                                     // cols 26..29
+  ];
+
+  // =========== 第二行: 具体字段列名 (30列) ===========
+  const headerRow2 = [
+    "Supplier",                     // 0
+    "Status",                       // 1
+    "PO #",                         // 2
+    "Date Entered",                 // 3
+    "PO Line No.",                  // 4
+    "ASIN",                         // 5
+    "Quantity",                     // 6
+    "Cost in USD",                  // 7
+    "Estimated Ready Date / ERD",   // 8
+    "ID",                           // 9
+
+    "term_name",                    // 10
+    "Deposit_Required",             // 11
+    "Prepay_H",                     // 12
+    "Net_Days",                     // 13
+
+    "Line_Values",                  // 14
+    "Line_ratio",                   // 15
+
+    "paid",                         // 16
+
+    "Unpaid_Vaule",                 // 17
+    "Unpaid Date",                  // 18
+    "Unpaid % Due",                 // 19
+    "Unpaid anchor",                // 20
+    "Unpaid $ Due",                 // 21
+
+    "Deposit_Date",                 // 22
+    "Deposit % Due",               // 23
+    "Deposit anchor",               // 24
+    "Deposit $ Due",               // 25
+
+    "Prepay Date",                  // 26
+    "Prepay % Due",                 // 27
+    "Prepay anchor",                // 28
+    "Prepay $ Due"                  // 29
+  ];
+
+  // 存放最终表格数据的二维数组
+  const aoa = [];
+  aoa.push(headerRow1);
+  aoa.push(headerRow2);
+
+  // =========== 第三行开始: 填写 data 中的每个元素 ===========
+  finalDataArray.forEach(item => {
+    const row = [
+      item.Supplier || "",
+      item.Status || "",
+      item["PO #"] || "",
+      item["Date Entered"] || "",
+      item["PO Line No."] || "",
+      item.ASIN || "",
+      item.Quantity || "",
+      item["Cost in USD"] || "",
+      item["Estimated Ready Date / ERD"] || "",
+      item.ID || "",
+
+      item.term_name || "",
+      item.Deposit_Required || "",
+      item.Prepay_H || "",
+      item.Net_Days || "",
+
+      // 新数据中常见字段: Line_Values, Line_ratio
+      item.Line_Values !== undefined ? item.Line_Values : "",
+      item.Line_ratio !== undefined ? item.Line_ratio : "",
+
+      // paid
+      item.paid !== undefined ? item.paid : "",
+
+      // Unpaid 相关
+      item.Unpaid?.value !== undefined ? item.Unpaid.value : "",
+      item.Unpaid?.["Unpaid Date"] || "",
+      item.Unpaid?.["Unpaid % Due"] || "",
+      item.Unpaid?.["Unpaid anchor"] || "",
+      item.Unpaid?.["Unpaid $ Due"] !== undefined ? item.Unpaid["Unpaid $ Due"] : "",
+
+      // Deposit
+      item.Deposit?.["Deposit Date"] || "",
+      item.Deposit?.["Deposit % Due"] || "",
+      item.Deposit?.["Deposit anchor"] || "",
+      item.Deposit?.["Deposit $ Due"] !== undefined ? item.Deposit["Deposit $ Due"] : "",
+
+      // Prepay
+      item.Prepay?.["Prepay Date"] || "",
+      item.Prepay?.["Prepay % Due"] || "",
+      item.Prepay?.["Prepay anchor"] || "",
+      item.Prepay?.["Prepay $ Due"] !== undefined ? item.Prepay["Prepay $ Due"] : ""
     ];
-  
-    // 第二行(31列): 具体列名
-    const headerRow2 = [
-      "Supplier", "Status", "PO #", "Date Entered", "PO Line No.", "ASIN", "Quantity",
-      "Cost in USD", "Estimated Ready Date / ERD", "ID",
-      "term_name", "Deposit_Required", "Prepay_H", "Net_Days",
-      "Line_Values", "multiple ERDs Conflict",
-      "ERDs Conflict Details", "paid",
-      "Unpaid_Vaule", "Unpaid Date", "Unpaid % Due", "Unpaid anchor", "Unpaid $ Due",
-      "Deposit_Date", "Deposit % Due", "Deposit anchor", "Deposit $ Due",
-      "Prepay Date", "Prepay % Due", "Prepay anchor", "Prepay $ Due"
-    ];
-  
-    // 准备存放表格的 AOA
-    const aoa = [];
-    aoa.push(headerRow1);
-    aoa.push(headerRow2);
-  
-    // 第三行开始: 填写 finalDataArray 中每个元素的数据
-    finalDataArray.forEach(item => {
-      // 注意：Unpaid, Deposit, Prepay 都是对象结构
-      //      未指定值时，要传空字符串
-      const row = [
-        item.Supplier || "",
-        item.Status || "",
-        item["PO #"] || "",
-        item["Date Entered"] || "",
-        item["PO Line No."] || "",
-        item.ASIN || "",
-        item.Quantity || "",
-        item["Cost in USD"] || "",
-        item["Estimated Ready Date / ERD"] || "",
-        item.ID || "",
-        item.term_name || "",
-        item.Deposit_Required || "",
-        item.Prepay_H || "",
-        item.Net_Days || "",
-        // 下面是 Balance 字段
-        item.Balance || "",
-        item["multiple ERDs Conflict"] !== undefined ? item["multiple ERDs Conflict"] : "",
-        item["ERDs Conflict Details"] || "",
-        item.paid !== undefined ? item.paid : "",
-        // Unpaid 相关
-        item.Unpaid?.value !== undefined ? item.Unpaid.value : "",
-        item.Unpaid?.["Unpaid Date"] || "",
-        item.Unpaid?.["Unpaid % Due"] || "",
-        item.Unpaid?.["Unpaid anchor"] || "",
-        item.Unpaid?.["Unpaid $ Due"] !== undefined ? item.Unpaid["Unpaid $ Due"] : "",
-        // Deposit
-        item.Deposit?.["Deposit Date"] || "",
-        item.Deposit?.["Deposit % Due"] || "",
-        item.Deposit?.["Deposit anchor"] || "",
-        item.Deposit?.["Deposit $ Due"] !== undefined ? item.Deposit?.["Deposit $ Due"] : "",
-        // Prepay
-        item.Prepay?.["Prepay Date"] || "",
-        item.Prepay?.["Prepay % Due"] || "",
-        item.Prepay?.["Prepay anchor"] || "",
-        item.Prepay?.["Prepay $ Due"] !== undefined ? item.Prepay?.["Prepay $ Due"] : ""
-      ];
-      aoa.push(row);
-    });
-  
-    return aoa;
-  }
+    aoa.push(row);
+  });
+
+  return aoa;
+}
+
   
 (function main() {
   try {
@@ -300,17 +341,20 @@ function buildFinalSheetAoa(finalDataArray) {
 
     // 设置首行单元格合并
     // 注意：以 {s:{r,c}, e:{r,c}} 表示起点(行,列)到终点(行,列)（从 0 开始计数）
-    finalWS['!merges'] = [
-    // "PO Data": columns 0..9, row 0
-    { s: {r:0, c:0},  e: {r:0, c:9} },
-    // "Payment Terms Define": columns 10..13
-    { s: {r:0, c:10}, e: {r:0, c:13} },
-    // "Balance Data": columns 18..22
-    { s: {r:0, c:18}, e: {r:0, c:22} },
-    // "Deposit Data": columns 23..26
-    { s: {r:0, c:23}, e: {r:0, c:26} },
-    // "Prepay Data": columns 27..30
-    { s: {r:0, c:27}, e: {r:0, c:30} }
+    finalWS["!merges"] = [
+      // "PO Data" => columns 0..9
+      { s: {r: 0, c: 0},  e: {r: 0, c: 9} },
+      // "Payment Terms Define" => columns 10..13
+      { s: {r: 0, c: 10}, e: {r: 0, c: 13} },
+      // "Line Data" => columns 14..15
+      { s: {r: 0, c: 14}, e: {r: 0, c: 15} },
+      // paid => column 16 (无需合并, 只有1列, 可不设)
+      // "Unpaid Data" => columns 17..21
+      { s: {r: 0, c: 17}, e: {r: 0, c: 21} },
+      // "Deposit Data" => columns 22..25
+      { s: {r: 0, c: 22}, e: {r: 0, c: 25} },
+      // "Prepay Data" => columns 26..29
+      { s: {r: 0, c: 26}, e: {r: 0, c: 29} }
     ];
 
     // 将 Worksheet 添加到工作簿
