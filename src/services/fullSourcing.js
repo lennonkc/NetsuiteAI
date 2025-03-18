@@ -422,6 +422,7 @@ async function processFullSourcing(sourceFile, vendorFile, wowCsvFile, paidCsvFi
     // 最终结果
     const finalJson = {
       data: finalData,
+      "totalLines": finalData.length,
       "Empty Payment_Terms POs": [...emptyTermNamePO],
       "Empty Payment_Terms Vendors": [...emptyTermNameVendor],
       "Having Payment Term Value but not in PTDefine.csv Vendors": Array.from(undefinePT_vendor),
