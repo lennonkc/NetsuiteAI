@@ -5,8 +5,7 @@ const path = require("path");
 const csv = require("csv-parser");
 
 /**
- * @description 获取当前时间，格式为 "Mon_Day" (比如 "Mar_5")
- * @returns {string} 当前日期字符串
+ * @description 获取当前时间，格式为 "Mon_Day" (例如 "Mar_5")
  */
 function getCurrentTime() {
   const now = new Date();
@@ -48,7 +47,7 @@ function parseWowTrackingCSV(filePath) {
 /**
  * @description 从 CSV 文件中解析各个 PO 的付款金额信息
  * @param {string} filePath CSV 文件路径
- * @returns {Promise<object>} 形如 { [poNumber]: number }，表示每个 PO 对应的付款金额
+ * @returns {Promise<object>} 形如 { [poNumber]: number }，表示每个 PO 对应的已付金额
  */
 function parsePaidCSV(filePath) {
   return new Promise((resolve, reject) => {
@@ -72,8 +71,6 @@ function parsePaidCSV(filePath) {
 
 /**
  * @description 解析类似 "3/4/2025" 或 "3/4/2025 7:58 am" 格式的日期字符串
- * @param {string} str 待解析的日期字符串
- * @returns {Date|null} 返回 Date 对象或 null
  */
 function parseDateMDY(str) {
   if (!str) return null;
@@ -85,8 +82,6 @@ function parseDateMDY(str) {
 
 /**
  * @description 将 Date 对象格式化为 "M/D/YYYY" 字符串
- * @param {Date} date 
- * @returns {string} 形如 "3/5/2025"
  */
 function formatDateMDY(date) {
   if (!date) return "";
@@ -98,9 +93,6 @@ function formatDateMDY(date) {
 
 /**
  * @description 给日期对象增加指定天数，返回新的日期对象
- * @param {Date} date 原日期对象
- * @param {number} days 需要增加的天数
- * @returns {Date|null} 新的日期对象或 null
  */
 function addDays(date, days) {
   if (!date) return null;
@@ -111,8 +103,6 @@ function addDays(date, days) {
 
 /**
  * @description 将类似 "50%" 的字符串转换为 0.5，小数形式
- * @param {string} pctStr 字符串形式的百分比
- * @returns {number} 对应小数值，如 0.5
  */
 function parsePct(pctStr) {
   if (!pctStr) return 0;
@@ -123,14 +113,14 @@ function parsePct(pctStr) {
 
 /**
  * @description 根据给定日期返回 "Past Due" 或该日期对应的月份缩写
- * @param {Date} date
- * @returns {string} "Past Due" 或 "Jan", "Feb", ...
  */
-const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const monthNames = [
+  "Jan","Feb","Mar","Apr","May","Jun",
+  "Jul","Aug","Sep","Oct","Nov","Dec"
+];
 function getAnchor(date) {
   if (!date) return "";
   const now = new Date();
-  // 若 date < now => "Past Due"；否则返回月份缩写
   return date.getMonth() < now.getMonth() ? "Past Due" : monthNames[date.getMonth()];
 }
 
@@ -145,12 +135,7 @@ function getAnchor(date) {
  * @param {string} paidCsvFile paid_Feb25.csv 文件路径，用来定义已付金额
  * @returns {Promise<string>} 返回输出的 final JSON 文件路径
  */
-async function processFullSourcing(
-  sourceFile,
-  vendorFile,
-  wowCsvFile,
-  paidCsvFile
-) {
+async function processFullSourcing(sourceFile, vendorFile, wowCsvFile, paidCsvFile) {
   try {
     // outputFile 动态生成
     const outputFile = `private/final_${getCurrentTime()}.json`;
@@ -190,7 +175,8 @@ async function processFullSourcing(
     const undefinePT_PO = new Set();
 
     // ============ 5) 合并来源：Record + vendorMap + wowData ============
-    const updatedData = sourceData.data.map((item) => {
+    //    此时还不做 Lines 合并，每条 line 都保留
+    let updatedData = sourceData.data.map((item) => {
       const vendorID = item.ID; // Record 中的 ID => vendor.entityid
       const vendorInfo = vendorMap[vendorID] || { term_name: "", terms: "" };
       const vendorTermName = vendorInfo.term_name; // 供应商的 term_name
@@ -208,19 +194,25 @@ async function processFullSourcing(
         !wowInfo["Prepay H"] &&
         !wowInfo["Net Days"]
       ) {
-        undefinePT_vendor.add(
-          item["Supplier"] + "(" + vendorInfo.term_name + ")"
-        );
+        undefinePT_vendor.add(item["Supplier"] + "(" + vendorInfo.term_name + ")");
         undefinePT_PO.add(item["PO #"] + "(" + vendorInfo.term_name + ")");
       }
 
-      // 返回合并后的行（带上支付条款）
+      // 计算每行的初始 Balance = QTY * Cost in USD
+      // 在后面会改名为 "Line_Values"
+      const quantity = parseFloat(item["Quantity"] || "0") || 0;
+      const costUSD = parseFloat(item["Cost in USD"] || "0") || 0;
+      const initialBalance = (quantity * costUSD).toFixed(2);
+
       return {
         ...item,
+        // 支付条款相关
         term_name: vendorInfo.term_name,
         Deposit_Required: wowInfo["Deposit Required"],
         Prepay_H: wowInfo["Prepay H"],
         Net_Days: wowInfo["Net Days"],
+        // 初始化 “Balance” = QTY * Cost
+        Balance: parseFloat(initialBalance)
       };
     });
 
@@ -228,9 +220,21 @@ async function processFullSourcing(
     console.log("📂 解析 paid_Feb25.csv...");
     const paidMap = await parsePaidCSV(paidCsvFile);
 
-    // ============ 7) 合并相同 PO 的多行 (基于“行号最小”逻辑) ============
+    // ============ 7) 计算每行的 "Line_ratio" 并派生新的 paid 值 ============
+    // 先过滤掉 "ERD" 为空 或 "Closed" = true 的行
+    updatedData = updatedData.filter((line) => {
+      // 也可在此打印出被过滤的行信息
+      if (!line["Estimated Ready Date / ERD"] || line["Closed"] === true) {
+        // console.log(`[Remove invalid line] PO#: ${line["PO #"]}, line#: ${line["PO Line No."]}`);
+        // 可以在此统计removed 的invalid line总数
+        return false;
+      }
+      return true;
+    });
+
+    // 不合并 lines，但仍按 PO# 做分组以便计算 sum
     const poGroups = {};
-    updatedData.forEach((line) => {
+    updatedData.forEach(line => {
       const poNum = line["PO #"] || "";
       if (!poGroups[poNum]) {
         poGroups[poNum] = [];
@@ -238,129 +242,72 @@ async function processFullSourcing(
       poGroups[poNum].push(line);
     });
 
-    let removalCount = 0;
-    const finalData = [];
+    // 对每个 PO 先计算该 PO 全部行的 Balance 总和，然后给每行计算 ratio
+    Object.keys(poGroups).forEach(poNum => {
+      const group = poGroups[poNum];
+      // 总 Balance
+      const sumBalance = group.reduce((acc, line) => acc + (line.Balance || 0), 0);
+      // 从 paid.csv 获取到该 PO 的付款总额
+      const totalPaid = paidMap.hasOwnProperty(poNum) ? paidMap[poNum] : 0;
 
-    // 拼接工具，用于逗号拼接字符串
-    function appendValue(base, addition) {
-      if (!base) return addition || "";
-      if (!addition) return base;
-      return base + "," + addition;
-    }
-
-    Object.keys(poGroups).forEach((poNum) => {
-      let group = poGroups[poNum];
-
-      // 过滤掉 ERD 为空或 Closed=true 的行
-      group = group.filter((line) => {
-        if (!line["Estimated Ready Date / ERD"] || line["Closed"] === true) {
-          // console.log(`[Remove line => empty ERD or closed] PO#: ${poNum}, line#: ${line["PO Line No."]}`);
-          return false;
-        }
-        return true;
-      });
-
-      // 若过滤后无行，跳过
-      if (!group.length) {
-        return;
+      // 为每行计算 ratio、paid、并准备后续使用
+      if (sumBalance > 0) {
+        group.forEach(line => {
+          // line_ratio = line.Balance / sumBalance
+          const ratio = line.Balance / sumBalance;
+          line["Line_ratio"] = parseFloat(ratio.toFixed(4));
+          // paid = totalPaid * ratio
+          line["paid"] = parseFloat((totalPaid * ratio).toFixed(2));
+        });
+      } else {
+        // 如果 sumBalance=0，说明全部行都无 cost/quantity，统一让 ratio=0、paid=0
+        group.forEach(line => {
+          line["Line_ratio"] = 0;
+          line["paid"] = 0;
+        });
       }
-
-      // 判断是否有多个不同ERD => 冲突
-      const allERDs = group.map((line) => line["Estimated Ready Date / ERD"]);
-      const distinctERDs = [...new Set(allERDs)];
-      const hasConflict = distinctERDs.length > 1;
-
-      // 找到行号最小的那一行作为基准行
-      let baseLine = group[0];
-      let minLineNo = parseInt(baseLine["PO Line No."] || "999999", 10);
-      for (let i = 1; i < group.length; i++) {
-        const lineNoVal = parseInt(group[i]["PO Line No."] || "999999", 10);
-        if (lineNoVal < minLineNo) {
-          baseLine = group[i];
-          minLineNo = lineNoVal;
-        }
-      }
-
-      // 合并其他行到 baseLine
-      let balanceSum = 0;
-      group.forEach((line) => {
-        const q = parseFloat(line["Quantity"] || "0") || 0;
-        const c = parseFloat(line["Cost in USD"] || "0") || 0;
-        balanceSum += q * c;
-
-        if (line !== baseLine) {
-          baseLine["PO Line No."] = appendValue(
-            baseLine["PO Line No."],
-            line["PO Line No."]
-          );
-          baseLine["Quantity"] = appendValue(
-            baseLine["Quantity"],
-            line["Quantity"]
-          );
-          baseLine["Cost in USD"] = appendValue(
-            baseLine["Cost in USD"],
-            line["Cost in USD"]
-          );
-          baseLine["ASIN"] = appendValue(
-            baseLine["ASIN"],
-            line["ASIN"]
-          );
-
-          // 其余字段使用“最后一行”的值
-          for (const key of Object.keys(line)) {
-            if (
-              [
-                "PO #",
-                "PO Line No.",
-                "Quantity",
-                "Cost in USD",
-                "Estimated Ready Date / ERD",
-              ].includes(key)
-            ) {
-              continue;
-            }
-            baseLine[key] = line[key];
-          }
-        }
-      });
-
-      // 合并结果字段
-      baseLine["Balance"] = balanceSum.toFixed(2);
-      baseLine["multiple ERDs Conflict"] = hasConflict;
-      baseLine["ERDs Conflict Details"] = hasConflict
-        ? allERDs.join(",")
-        : "";
-
-      removalCount += group.length - 1;
-      finalData.push(baseLine);
     });
 
-    // ============ 8) 设置 paid 字段 ============
-    finalData.forEach((line) => {
-      const poNum = line["PO #"] || "";
-      line["paid"] = paidMap.hasOwnProperty(poNum) ? paidMap[poNum] : 0;
+    // 现在 updatedData 中每行都带有:
+    // - "Balance" (行本身 QTY*Cost)
+    // - "Line_ratio"
+    // - "paid" = totalPaid * ratio
+    // 后续我们要重命名 "Balance" -> "Line_Values" = "Balance" * ratio
+
+    let finalData = updatedData; // 不需要任何合并
+
+    // ============ 8) 重新处理“Line_Values”和“paid”的逻辑 ============
+    // 1) 原先 "Balance" 重命名为 "Line_Values"
+    // 2) "Line_Values" = 原Balance * line_ratio
+    finalData.forEach(line => {
+      const oldBalance = parseFloat(line.Balance || 0);
+      const ratio = parseFloat(line["Line_ratio"] || 0);
+      const newValue = oldBalance; 
+
+      // 改名
+      delete line.Balance; 
+      line["Line_Values"] = parseFloat(newValue.toFixed(2));
     });
 
-    // ============ 9) 统计 ============
-    // 统计存在 line 冲突的 PO 数量
-    const conflictERDsCount = finalData.filter((line) => {
-      return line["multiple ERDs Conflict"] === true;
-    }).length;
+    // ============ 9) 统计 / 其他报告相关 ============
+    // 目前不再有 multiple ERDs Conflict 或 ERDs Conflict Details，所以相关逻辑删除
+    // 统计信息若需要可自行扩展
 
-    // ============ 10) 为每个元素添加“Deposit”、“Prepay”、“Unpaid”等信息 ============
-    finalData.forEach((line) => {
-      // 解析数字, 这里的Balance是整个PO所有Lines的 QTY*Cost
-      const balanceVal = parseFloat(line["Balance"] || "0") || 0;
-      const paidVal = parseFloat(line["paid"] || "0") || 0;
+    // ============ 10) 对每行再计算 Deposit / Prepay / Unpaid ============
+    // 现在所有押金、预付款、未付款的基准都用 "Line_Values"
+    finalData.forEach(line => {
+      // 解析数字
+      const lineValue = parseFloat(line["Line_Values"] || 0);
+      const paidVal   = parseFloat(line["paid"] || 0);
 
-      // 1) Unpaid = Balance - paid
-      const unpaidVal = balanceVal - paidVal;
+      // Unpaid = lineValue - paid
+      const unpaidVal = lineValue - paidVal;
       line["Unpaid"] = {
         value: +unpaidVal.toFixed(2),
       };
 
-      // 2) Deposit  (PaidVal <= 0 则需要交押金)
-      const depositFrac = parsePct(line["Deposit_Required"]); // 0~1
+      // Deposit
+      const depositFrac = parsePct(line["Deposit_Required"]); 
       const dateEntered = parseDateMDY(line["Date Entered"] || "");
       const depositDate = addDays(dateEntered, 14);
       const depositDateStr = formatDateMDY(depositDate);
@@ -368,7 +315,7 @@ async function processFullSourcing(
 
       let depositDue = 0;
       if (paidVal <= 0) {
-        depositDue = depositFrac * balanceVal;
+        depositDue = depositFrac * lineValue;
       }
       line["Deposit"] = {
         "Deposit Date": depositDateStr,
@@ -377,7 +324,7 @@ async function processFullSourcing(
         "Deposit $ Due": +depositDue.toFixed(2),
       };
 
-      // 3) Prepay
+      // Prepay
       const prepayFrac = parsePct(line["Prepay_H"]); // 0~1
       const erd = parseDateMDY(line["Estimated Ready Date / ERD"] || "");
       const prepayDateStr = formatDateMDY(erd);
@@ -395,7 +342,7 @@ async function processFullSourcing(
         "Prepay $ Due": +prepayDue.toFixed(2),
       };
 
-      // 4) Unpaid (对象部分)
+      // 剩余尾款
       let remainderFrac = 1 - depositFrac - prepayFrac;
       if (remainderFrac < 0) remainderFrac = 0;
       const unpaidPctStr = `${(remainderFrac * 100).toFixed(0)}%`;
@@ -405,18 +352,18 @@ async function processFullSourcing(
       const unpaidDateStr = formatDateMDY(unpaidDate);
       const unpaidAnchor = getAnchor(unpaidDate);
 
-      let unpaidDue = 0;
+      let remainderDue = 0;
       if (unpaidVal > 0) {
         const portion = remainderFrac * unpaidVal;
-        unpaidDue = Math.min(portion, unpaidVal);
+        remainderDue = Math.min(portion, unpaidVal);
       }
       line["Unpaid"]["Unpaid Date"] = unpaidDateStr;
       line["Unpaid"]["Unpaid % Due"] = unpaidPctStr;
       line["Unpaid"]["Unpaid anchor"] = unpaidAnchor;
-      line["Unpaid"]["Unpaid $ Due"] = +unpaidDue.toFixed(2);
+      line["Unpaid"]["Unpaid $ Due"] = +remainderDue.toFixed(2);
     });
 
-    // ============ 11) 为最终的 json report 删除非关键字段 ============
+    // ============ 11) 为最终json report删除非关键字段 & term_name为空的处理 ============
     const fieldsToRemove = [
       "As Of Date",
       "Coordinator",
@@ -463,8 +410,7 @@ async function processFullSourcing(
     const emptyTermNamePO = new Set();
     const emptyTermNameVendor = new Set();
 
-    // 保留 term_name 不为空的行
-    const removed_emptyPT_finalData = finalData.filter(line => {
+    finalData = finalData.filter(line => {
       if (!line.term_name) {
         emptyTermNamePO.add(line["PO #"] || "");
         emptyTermNameVendor.add(line["Supplier"] || "");
@@ -473,24 +419,11 @@ async function processFullSourcing(
       return true;
     });
 
-    // 计算因为 line 冲突导致的误差估计
-    let ErrorEstimationDueToLineConflicts = 0;
-    removed_emptyPT_finalData.forEach(line => {
-      if (line["multiple ERDs Conflict"] === true) {
-        // 这里简单地将 10% (0.1) 作为一个冲突导致的误差乘以 Unpaid
-        ErrorEstimationDueToLineConflicts += line["Unpaid"]["Unpaid $ Due"] * 0.1;
-      }
-    });
-
-    // 构造最终输出 JSON
+    // 最终结果
     const finalJson = {
-      data: removed_emptyPT_finalData,
-      "Removals Dulplicate Line": removalCount,
-      "[POs total Amounts] - [POs unvalid Amounts] = POs valid Amounts": `[${finalData.length}] - [${emptyTermNamePO.size}] = ${removed_emptyPT_finalData.length}`,
+      data: finalData,
       "Empty Payment_Terms POs": [...emptyTermNamePO],
       "Empty Payment_Terms Vendors": [...emptyTermNameVendor],
-      "Mutiple ERDs conflict PO Count": conflictERDsCount,
-      "Error Estimation Due To Line Conflicts": ErrorEstimationDueToLineConflicts.toFixed(2),
       "Having Payment Term Value but not in PTDefine.csv Vendors": Array.from(undefinePT_vendor),
     };
 
@@ -500,8 +433,8 @@ async function processFullSourcing(
       fs.mkdirSync(privateDir, { recursive: true });
     }
 
-    // 写入最终文件
     fs.writeFileSync(outputFile, JSON.stringify(finalJson, null, 2), "utf8");
+    console.log(`✅ 全部处理完成，数据已保存到 ${outputFile}`);
 
     return outputFile; // 返回输出文件路径
   } catch (error) {

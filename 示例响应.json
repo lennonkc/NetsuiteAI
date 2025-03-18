@@ -1763,3 +1763,15 @@ const finaljson_path = "private/final_Mar_16.json";
   "Error Estimation Due To Line Conflicts": "487156.29",
   "Having Payment Term Value but not in PTDefine.csv Vendors": []
 }
+
+
+
+
+基于上面的代码, 我需要优化第 lines合并 和 paid字段生成的代码, 并对原有的"Balance"字段进行名称变更.
+
+我的需求是:
+1. 取消lines的合并, 并生成"Line_ratio"字段; 现有的逻辑是将同个PO的所有Lines进行合并, 然后根据Paid.csv的数据获取这个PO的Paid数据来生成一个paid字段, PO和paid.csv的PO是一对一的对应关系, 所以在生成Paid字段造成了一定的方便些. 但这会导致一个问题, 合并lines之后, 有部分PO的ERDs字段的日期不是一样的, 这会导致其Unpaid, Deposit, Prepay的日期计算出现很多误差, 我现在需要取消lines的合并, 但这会导致PO数据存在多条,则与paid.csv的数据是多对一的关系, 所以我需要对每个PO数据生成一个新的字段, "Line_ratio" = 当前line的Balance / 当前line的同个PO的所有Lines的Balance的总和.
+如果某个PO只有一个line, 则Line_ratio = 1
+2. 优化paid字段的生成. 新的paid字段数据应该是 = 从Paid.csv中获取的Paid数据 * Line_ratio
+3. 去除multiple ERDs Conflict字段, 以及其对应的字段ERDs Conflict Details, 这两个字段是多余的, 因为现在不再合并lines, 所以不会出现这种情况. 删掉整体代码中关于已去除的字段的逻辑.
+4. 在处理完所有数据之后, 在最后把原来Balance字段改名为"Line_Values", 其值应该=原来的Balance * Line_ratio. 更改成"Line_Values"之后, 后续的代码也要用"Line_Values"替换原来的Balance字段, 不能导致后续的代码出现问题.
