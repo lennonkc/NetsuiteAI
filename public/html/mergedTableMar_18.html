@@ -1,0 +1,298 @@
+
+  <style>
+    .merge-budget-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: Arial, sans-serif;
+    }
+    .merge-budget-table th, .merge-budget-table td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      white-space: normal;
+      text-align: right; /* 数字右对齐 */
+    }
+    .merge-budget-table thead tr {
+      background-color: #007bff;
+      color: #fff;
+    }
+    /* 固定列宽: 第一列150px, 其余50px (或更多) */
+    .merge-budget-table th:first-child,
+    .merge-budget-table td:first-child {
+      width: 150px;
+      text-align: left; /* 行名左对齐 */
+    }
+    .merge-budget-table th:not(:first-child),
+    .merge-budget-table td:not(:first-child) {
+      width: 50px;
+      min-width: 50px;
+    }
+    /* 交替行颜色 
+    .merge-budget-table tbody tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }*/
+    /* 紫色背景行 */
+    .purple-row {
+      background-color: #d9b3ff;
+    }
+    /* 如果要加粗 */
+    .bold-text {
+      font-weight: bold;
+    }
+    /* 容器可横向滚动 */
+    .merge-budget-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+    /* input 样式(仅供示例) */
+    .merge-budget-table input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      text-align: right; 
+      border: none;
+      outline: none;
+      font-size: 15px;
+      background-color: inherit; /* 保持与所在单元格一致 */
+    }
+  </style>
+  
+  <div class="merge-budget-container">
+    <table class="merge-budget-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>YTD</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th>FY 25</th>
+        </tr>
+      </thead>
+      <tbody>
+  <tr class=""><td class="bold-text">Total Budget</td><td>$13.92M</td><td>$3.07M</td><td>$3.66M</td><td>$5.02M</td><td>$5.30M</td><td>$6.31M</td><td>$6.76M</td><td>$6.14M</td><td>$5.61M</td><td>$5.33M</td><td>$6.02M</td><td>$67.13M</td></tr><tr class=""><td >Merch Paid</td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="0" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="1" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="2" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="3" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="4" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="5" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="6" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="7" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="8" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="9" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="10" value=""></td><td><input type="text" oninput="recalcTable()" data-row="merchPaid" data-col="11" value=""></td></tr><tr class=""><td class="bold-text">Open POs / AP outstanding</td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="0" value="$4.68M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="1" value="$1.99M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="2" value="$2.30M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="3" value="$1.96M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="4" value="$0.76M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="5" value="$0.91M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="6" value="$0.10M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="7" value="$0.02M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="8" value="$0.17M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="9" value="$0.57M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="10" value="$1.32M"></td><td><input type="text" oninput="recalcTable()" data-row="openPOs" data-col="11" value="$14.78M"></td></tr><tr class="purple-row"><td >Approved buy - US</td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="0" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="1" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="2" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="3" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="4" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="5" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="6" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="7" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="8" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="9" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="10" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUS" data-col="11" value=""></td></tr><tr class="purple-row"><td >Approved buy - UK</td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="0" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="1" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="2" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="3" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="4" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="5" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="6" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="7" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="8" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="9" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="10" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appUK" data-col="11" value=""></td></tr><tr class="purple-row"><td >Approved buy - NPI</td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="0" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="1" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="2" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="3" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="4" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="5" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="6" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="7" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="8" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="9" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="10" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appNPI" data-col="11" value=""></td></tr><tr class="purple-row"><td >Approved buy - Components</td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="0" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="1" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="2" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="3" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="4" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="5" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="6" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="7" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="8" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="9" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="10" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appComponents" data-col="11" value=""></td></tr><tr class="purple-row"><td >Approved buy - BAM</td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="0" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="1" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="2" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="3" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="4" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="5" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="6" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="7" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="8" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="9" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="10" value=""></td><td><input type="text" oninput="recalcTable()" data-row="appBAM" data-col="11" value=""></td></tr><tr class=""><td >Disbursements Total</td><td><span data-row="disbursements" data-col="0"></span></td><td><span data-row="disbursements" data-col="1"></span></td><td><span data-row="disbursements" data-col="2"></span></td><td><span data-row="disbursements" data-col="3"></span></td><td><span data-row="disbursements" data-col="4"></span></td><td><span data-row="disbursements" data-col="5"></span></td><td><span data-row="disbursements" data-col="6"></span></td><td><span data-row="disbursements" data-col="7"></span></td><td><span data-row="disbursements" data-col="8"></span></td><td><span data-row="disbursements" data-col="9"></span></td><td><span data-row="disbursements" data-col="10"></span></td><td><span data-row="disbursements" data-col="11"></span></td></tr><tr class=""><td >Remaining Budget</td><td><span data-row="remainBudget" data-col="0"></span></td><td><span data-row="remainBudget" data-col="1"></span></td><td><span data-row="remainBudget" data-col="2"></span></td><td><span data-row="remainBudget" data-col="3"></span></td><td><span data-row="remainBudget" data-col="4"></span></td><td><span data-row="remainBudget" data-col="5"></span></td><td><span data-row="remainBudget" data-col="6"></span></td><td><span data-row="remainBudget" data-col="7"></span></td><td><span data-row="remainBudget" data-col="8"></span></td><td><span data-row="remainBudget" data-col="9"></span></td><td><span data-row="remainBudget" data-col="10"></span></td><td><span data-row="remainBudget" data-col="11"></span></td></tr><tr class=""><td >Remaining Quarterly Budget</td><td><span data-row="remainQuarterly" data-col="0"></span></td><td><span data-row="remainQuarterly" data-col="1"></span></td><td><span data-row="remainQuarterly" data-col="2"></span></td><td><span data-row="remainQuarterly" data-col="3"></span></td><td><span data-row="remainQuarterly" data-col="4"></span></td><td><span data-row="remainQuarterly" data-col="5"></span></td><td><span data-row="remainQuarterly" data-col="6"></span></td><td><span data-row="remainQuarterly" data-col="7"></span></td><td><span data-row="remainQuarterly" data-col="8"></span></td><td><span data-row="remainQuarterly" data-col="9"></span></td><td><span data-row="remainQuarterly" data-col="10"></span></td><td><span data-row="remainQuarterly" data-col="11"></span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <script>
+  // -------------- JS部分：当用户修改输入框时动态刷新 --------------
+  
+  // 小工具：将"$xx.xxM"解析回数值(单位: 1美元), 若无则返回0
+  function parseMillion(str) {
+    if (!str) return 0;
+    // 形如 "$12.34M"
+    // 去掉美元符号、M，转成数值
+    const cleaned = str.replace(/[^0-9.\-]/g, ""); // 保留数字和小数点
+    const num = parseFloat(cleaned);
+    if (isNaN(num)) return 0;
+    return num * 1e6;
+  }
+  
+  // 小工具：将数值(单位=美元)转换成"$xx.xxM" 右对齐
+  function formatMillion(val) {
+    if (!val || isNaN(val) || val === 0) return "";
+    const million = val / 1e6;
+    return "$" + million.toFixed(2) + "M";
+  }
+  
+  // 当用户修改输入框时, 重算 Disbursements Total, Remaining Budget, Remaining Quarterly Budget
+  function recalcTable() {
+    // 1) 先把所有输入框的值解析出来, 并存储到一个临时结构中
+    //    rowId => [12列数值(单位美元)]
+    const rowData = {};
+    const inputs = document.querySelectorAll('input[data-row]');
+    inputs.forEach(ip => {
+      const rowId = ip.getAttribute('data-row');
+      const colIndex = parseInt(ip.getAttribute('data-col'), 10);
+      const valNum = parseMillion(ip.value);
+      if (!rowData[rowId]) {
+        rowData[rowId] = new Array(12).fill(0);
+      }
+      rowData[rowId][colIndex] = valNum;
+    });
+  
+    // 2) 处理非输入行(比如 "Total Budget", 初始就硬编码在HTML里, 也要解析)
+    //    这里演示只解析 "Total Budget" 行, 其余如果还想解析, 同理即可
+    rowData["totalBudget"] = new Array(12).fill(0);
+    const tbCells = document.querySelectorAll('td span[data-row="totalBudget"], td[data-row="totalBudget"]');
+    // 但我们上面并没有给 totalBudget 的 td 加 data-row. 
+    // 这里更简单方式: 直接从HTML初始的值去读. 
+    // => 我们先在 <td> 里加 data-row="totalBudget" data-col="x" ?
+    // => 为了简化，这里手动解析:
+  
+    // 简便做法: 直接从HTML中 rows[0].data 里 parse
+    // (行[0]是我们生成JS前, "Total Budget" 可能只在innerHTML)
+    // 但为了避免混乱，这里就先手写解析：
+    // 反正本demo里 "Total Budget" 不会变动.
+  
+    // 3) 计算 Disbursements Total: 
+    //    = Merch Paid + Open POs + Approved buy(US/UK/NPI/Components/BAM)
+    //    row ids = merchPaid, openPOs, appUS, appUK, appNPI, appComponents, appBAM
+    const colCount = 12;
+    const dispRow = new Array(colCount).fill(0);
+    let sumRowIDs = ["merchPaid", "openPOs", "appUS", "appUK", "appNPI", "appComponents", "appBAM"];
+    sumRowIDs.forEach(rid => {
+      if (!rowData[rid]) {
+        rowData[rid] = new Array(colCount).fill(0);
+      }
+    });
+    for (let c=0; c<colCount; c++) {
+      dispRow[c] = sumRowIDs.reduce((acc, rid) => acc + rowData[rid][c], 0);
+    }
+    rowData["disbursements"] = dispRow;
+  
+    // 4) 计算 Remaining Budget = Total Budget - Disbursements
+    //    先解析 "Total Budget" 行(硬编码在HTML) => 需要看行[0].data ?
+    //    我们在JS中已知:
+    const totalBudgetVals = [
+      // 从HTML中那行拿：与上面相同
+      "$13.92M","$3.07M","$3.66M","$5.02M","$5.30M",
+      "$6.31M","$6.76M","$6.14M","$5.61M","$5.33M",
+      "$6.02M","$67.13M"
+    ].map(parseMillion);
+  
+    const remainRow = new Array(colCount).fill(0);
+    for (let c=0; c<colCount; c++) {
+      remainRow[c] = totalBudgetVals[c] - dispRow[c];
+    }
+    rowData["remainBudget"] = remainRow;
+  
+    // 5) 计算 Remaining Quarterly Budget:
+    //    仅在Mar(1), Jun(4), Sep(7), Dec(10) 有值
+    //    例如 Mar => YTD(0)+Mar(1) 两列的 remainBudget 之和
+    //    Jun => Apr(2)+May(3)+Jun(4)
+    //    Sep => Jul(5)+Aug(6)+Sep(7)
+    //    Dec => Oct(8)+Nov(9)+Dec(10)
+    const rqRow = new Array(colCount).fill(0);
+    const rb = rowData["remainBudget"];
+    // Mar (col=1) => YTD(0) + Mar(1)
+    rqRow[1] = rb[0] + rb[1];
+    // Jun (col=4) => Apr(2) + May(3) + Jun(4)
+    rqRow[4] = rb[2] + rb[3] + rb[4];
+    // Sep (col=7) => Jul(5) + Aug(6) + Sep(7)
+    rqRow[7] = rb[5] + rb[6] + rb[7];
+    // Dec (col=10) => Oct(8) + Nov(9) + Dec(10)
+    rqRow[10] = rb[8] + rb[9] + rb[10];
+    rowData["remainQuarterly"] = rqRow;
+  
+    // 6) 写回到表格中
+    //    对于 "disbursements", "remainBudget", "remainQuarterly" 三行,
+    //    我们在HTML中用 <span data-row="xxx" data-col="c"></span> 占位
+    ["disbursements","remainBudget","remainQuarterly"].forEach(rid => {
+      const spans = document.querySelectorAll(`span[data-row="${rid}"]`);
+      spans.forEach(sp => {
+        const c = parseInt(sp.getAttribute("data-col"), 10);
+        const val = rowData[rid][c] || 0;
+        sp.textContent = formatMillion(val);
+      });
+    });
+  }
+  
+  // 首次载入时，调用一次 recalc，刷新那些空白的 "disbursements","remainBudget","remainQuarterly"
+  document.addEventListener("DOMContentLoaded", () => {
+    recalcTable();
+  });
+  </script>
+  
+    <style>
+      /* 外层容器，带圆角、浅色背景、阴影，提升视觉层次 */
+      .info-container {
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        padding: 20px;
+        margin-top: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        font-family: Arial, sans-serif;
+      }
+
+      .info-container h2 {
+        margin-top: 0;
+        color: #333;
+        font-size: 1.4em;
+        border-left: 4px solid #007bff; 
+        padding-left: 8px;
+      }
+
+      .info-container h3 {
+        color: #333;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+      }
+
+      .info-container p {
+        line-height: 1.6;
+        color: #555;
+        margin-top: 0.5em;
+        margin-bottom: 1.2em;
+      }
+
+      .info-container ul {
+        margin-left: 20px;
+        padding-left: 0;
+      }
+
+      .info-container li {
+        margin-bottom: 5px;
+        list-style: disc;
+      }
+
+      .highlight {
+        color: #007bff;
+        font-weight: bold;
+      }
+
+      .warning-text {
+        color: #ff6600;
+        font-weight: bold;
+      }
+
+      .error-amount {
+        color: #d9534f;
+        font-weight: bold;
+      }
+
+      .separator {
+        margin: 1.2em 0;
+        border: none;
+        border-top: 1px dashed #ccc;
+      }
+    </style>
+
+    <div class="info-container">
+      <h2>Additional Information</h2>
+
+      <p>
+        <span class="warning-text">🌟 Notice:</span> We calculated <strong>1795</strong> PO lines 
+        <br>
+        <span class="warning-text">📝 Document:</span> The key information for this project is maintained in this document.
+ <strong> <a href="https://docs.google.com/document/d/1GX2ExrTL1QmkDNUnB1wRu7UpKENR7HzwPdXal_9a1OY/edit?tab=t.0#heading=h.n8ic0ggtrppy">Link</a> </strong>
+        <br>
+        <span class="highlight">📆 Date of Open PO data: </span> <strong>Mar 17</strong> 
+        <br>
+        <span class="highlight">📆 Date of Paid PO data: </span> <strong>Feb 18</strong>  
+      </p>
+
+      <hr class="separator">
+
+      <h3>Empty Payment_Terms Detected</h3>
+      <p>
+        Some POs/Vendors were found with empty payment terms. 
+      </p>
+      <ul>
+        <li><strong>Empty Payment_Terms POs:</strong> 
+          PO66534, PO66453, PO66321, PO66316, PO66030, PO65636, PO65288, PO65271, PO65269, PO65268, PO65043, PO64693, PO64611, PO64554, PO64387, PO63408, PO62598</li>
+        <li><strong>Empty Payment_Terms Vendors:</strong> 
+          MediaPrint EK Ltd, Shandong Honghan International Trading Co, OPM Group, Ambrose Continental, LLC dba Hudson Associates, Container and Packaging, Jieyang Fengxing Stainless Steel Products Co., Ltd., Xinlehong Toys Factory</li>
+      </ul>
+      <p>
+        The effected amount is <strong class="highlight">$ 0.47M</strong>.
+      </p>
+      <p>
+        Additionally, the following vendors have Payment Term values 
+        not present in our <em>PTDefine.csv</em> reference:
+      </p>
+      <ul>
+        <li>✅ All is well, No such vendor found.</li>
+      </ul>
+
+      <hr class="separator">
+
+
+    </div>
+  

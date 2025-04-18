@@ -1,0 +1,271 @@
+{
+    "links": [
+        {
+            "rel": "self",
+            "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseOrder/14346205"
+        }
+    ],
+    "approvalStatus": {
+        "id": "2",
+        "refName": "Approved"
+    },
+    "balance": 0,
+    "billingAddress": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/billingAddress"
+            }
+        ]
+    },
+    "createdDate": "2022-01-21T13:00:00Z",
+    "currency": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/currency/1"
+            }
+        ],
+        "id": "1",
+        "refName": "USD"
+    },
+    "custbody6": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/customrecord_celigo_amzio_account_info/4359"
+            }
+        ],
+        "id": "4359",
+        "refName": "N/A"
+    },
+    "custbody_blackline_source": false,
+    "custbody_cash_register": false,
+    "custbody_createdby": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/employee/10010"
+            }
+        ],
+        "id": "10010",
+        "refName": "Elmar Guañizo"
+    },
+    "custbody_delegation_approver_roles": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/custbody_delegation_approver_roles"
+            }
+        ]
+    },
+    "custbody_delegation_approver_user": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/custbody_delegation_approver_user"
+            }
+        ]
+    },
+    "custbody_dont_send_email_notification": false,
+    "custbody_email_sent": false,
+    "custbody_exc_prepayment": false,
+    "custbody_jp_loc_inv_sum_payments": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/custbody_jp_loc_inv_sum_payments"
+            }
+        ]
+    },
+    "custbody_jp_vendtaxexempent": false,
+    "custbody_line_updated": false,
+    "custbody_next_approver_role": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/custbody_next_approver_role"
+            }
+        ]
+    },
+    "custbody_next_approver_users": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/custbody_next_approver_users"
+            }
+        ]
+    },
+    "custbody_nondeductible_processed": false,
+    "custbody_nondeductible_ref_tran": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/custbody_nondeductible_ref_tran"
+            }
+        ]
+    },
+    "custbody_ns_acs_role_approval": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/custbody_ns_acs_role_approval"
+            }
+        ]
+    },
+    "custbody_nsts_vp_auto_apply_prepayment": false,
+    "custbody_nsts_vp_include_tax": false,
+    "custbody_nsts_vp_po_employee_email": "elmar.guanizo@thras.io",
+    "custbody_nsts_vp_prepay_trans": false,
+    "custbody_nsts_vp_prepay_vp": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/custbody_nsts_vp_prepay_vp"
+            }
+        ]
+    },
+    "custbody_nsts_vp_vendor_email": "Ronit@unicargo.com",
+    "custbody_nsts_vp_with_prepayments": false,
+    "custbody_po_related_bill": false,
+    "custbody_report_timestamp": "21/01/2022 05:00:14",
+    "custbody_reviewed_supplier": false,
+    "custbody_sc_email_sent": false,
+    "custbody_stc_amount_after_discount": 2826.0,
+    "custbody_stc_tax_after_discount": 0.0,
+    "custbody_stc_total_after_discount": 2826.0,
+    "custbody_suitel10n_jp_ids_transactions": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/custbody_suitel10n_jp_ids_transactions"
+            }
+        ]
+    },
+    "custbody_supplier_changes_confirmed": false,
+    "custbody_sw_awa_is_stand_alone_bill": false,
+    "custbody_tbd": false,
+    "custbody_th_has_lot_numbered_itm": false,
+    "custbody_th_ship_from_add1": "333 City Blvd W,",
+    "custbody_th_ship_from_city": "Orange",
+    "custbody_th_ship_from_country": "US",
+    "custbody_th_ship_from_email": "NaomiC@unicargo.com",
+    "custbody_th_ship_from_select": "7327618",
+    "custbody_th_ship_from_state": "CA",
+    "custbody_th_ship_from_zip_code": "92868",
+    "custbody_thrasio_adhoc_po_mto": false,
+    "custbody_thrasio_amt_after_exchange": 2826.0,
+    "custbody_thrasio_amt_in_words": "TWO THOUSAND EIGHT HUNDRED TWENTY-SIX USD",
+    "custbody_thrasio_send_to_xpo_connect": false,
+    "custbody_vendbill_req_sc_approval": false,
+    "custbody_versapay_capture_tran_total": false,
+    "custbody_zeronsu": false,
+    "customForm": {
+        "id": "165",
+        "refName": "Thras.io Purchase Order"
+    },
+    "email": "Ronit@unicargo.com",
+    "employee": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/employee/10010"
+            }
+        ],
+        "id": "10010",
+        "refName": "Elmar Guañizo"
+    },
+    "entity": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/vendor/1830"
+            }
+        ],
+        "id": "1830",
+        "refName": "U-US-00003 UNICARGO LTD"
+    },
+    "exchangeRate": 1.0,
+    "expense": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/expense"
+            }
+        ]
+    },
+    "id": "14346205",
+    "item": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/item"
+            }
+        ]
+    },
+    "lastModifiedDate": "2024-12-07T07:28:00Z",
+    "location": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/location/1234"
+            }
+        ],
+        "id": "1234",
+        "refName": "Carrier to NA [Virtual]"
+    },
+    "memo": "120536 / TO2823489 FBA16GNTGRWP  UNC882017 7UU3S9QR",
+    "nextApprover": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/employee/6542"
+            }
+        ],
+        "id": "6542",
+        "refName": "Jeron  Dolot"
+    },
+    "orderStatus": {
+        "id": "G",
+        "refName": "G"
+    },
+    "originator": "CSV",
+    "prevDate": "2022-01-12",
+    "shipAddress": "Carrier to NA\nUnited States",
+    "shipDate": "2022-01-21",
+    "shipIsResidential": false,
+    "shipOverride": true,
+    "shippingAddress": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/purchaseorder/14346205/shippingAddress"
+            }
+        ]
+    },
+    "shippingAddress_text": "Carrier to NA\nUnited States",
+    "source": {
+        "id": "CSV",
+        "refName": "CSV"
+    },
+    "status": {
+        "id": "Fully Billed",
+        "refName": "Fully Billed"
+    },
+    "subsidiary": {
+        "links": [
+            {
+                "rel": "self",
+                "href": "https://5377549-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/subsidiary/34"
+            }
+        ],
+        "id": "34",
+        "refName": "Charope, Inc."
+    },
+    "toBeEmailed": false,
+    "toBeFaxed": false,
+    "toBePrinted": false,
+    "total": 2826.0,
+    "tranDate": "2022-01-12",
+    "tranId": "PO46015"
+}
