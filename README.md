@@ -1,2 +1,0 @@
-# NetsuiteAI
-用于搭建为Thrasio设计的Netsuite项目

@@ -1,7 +1,0 @@
-.DS_Store
-.env
-node_modules/
-npm-debug.log
-yarn-debug.log*
-private/
-.DS_Store
