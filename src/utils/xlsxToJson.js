@@ -190,8 +190,8 @@ async function convertXlsxToJson(inputFileName, outputFileName, inputDir, output
 // --- 使用示例 ---
 // 定义输入和输出目录及文件名
 const privateDir = path.resolve(__dirname, '../../public/xlsx/'); // 使用相对路径
-const inputFile = 'PurchaseOrderApr18.xlsx';
-const outputFile = 'PurchaseOrderApr18_FFFT.json';
+const inputFile = 'scoFilted_May14.xlsx';
+const outputFile = 'PurchaseOrderMay14.json';
 
 // 调用函数执行转换
 convertXlsxToJson(inputFile, outputFile, privateDir, privateDir);
