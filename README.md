@@ -148,7 +148,30 @@ Place the necessary data files in the `private/` directory. Based on the configu
 *   `private/2025May/paidPOMay9.csv`: The payment records file.
 *   *(Note: Purchase order and vendor data will be automatically fetched from the NetSuite API and saved to the `private/` directory by the scripts.)*
 
-**5. Run the Main Process**
+**5. Deploy NetSuite RESTlet Script**
+
+To allow the system to fetch purchase order data from NetSuite, you need to deploy the RESTlet script.
+
+1.  **Upload the Script**:
+    *   In NetSuite, navigate to `Customization > Scripting > Scripts > New`.
+    *   Upload the file [`src/utils/netsuite_GetSearch.js`](src/utils/netsuite_GetSearch.js:1).
+    *   Click **Create Script Record**.
+
+2.  **Configure the Script Record**:
+    *   Set a **Name** for the script (e.g., "PO Data Fetcher RESTlet").
+    *   Save the script record.
+
+3.  **Create the Deployment**:
+    *   Click the **Deploy Script** button on the script record page.
+    *   Set the **Status** to `Released`.
+    *   Set the **Audience** to the appropriate roles (e.g., All Roles).
+    *   Save the deployment.
+
+4.  **Update `.env`**:
+    *   After deployment, NetSuite provides an `External URL`.
+    *   Copy the path portion of this URL (e.g., `/app/site/hosting/restlet.nl?script=xxxx&deploy=1`) and set it as the `API_PATH` in your `.env` file.
+
+**6. Run the Main Process**
 Execute the main script to start the complete data processing workflow:
 ```bash
 node src/index.js
