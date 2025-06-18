@@ -25,21 +25,26 @@ This project is an automated data processing and report generation system design
 ## Core Workflow
 
 ```mermaid
+
 graph TD
     subgraph "Inputs"
         A1["fa:fa-file-csv PT_Define.csv (Payment Terms)"]
         A2["fa:fa-file-csv Paid_Data.csv (Paid Records)"]
-        A3["fa:fa-cloud NetSuite ERP"]
+        
+        subgraph "NetSuite"
+            NS1["fa:fa-cogs SuiteScript"]
+            NS2["fa:fa-comments SuiteTalk"]
+        end
     end
 
     subgraph "Data Fetching & Processing (Node.js Scripts)"
-        B1["SourcePO.js"] -- "GET /restlet" --> A3
-        A3 -- "PO Data (JSON)" --> B1
+        B1["SourcePO.js"]
+        NS1 -- "PO Data (JSON)" --> B1
         B1 -- "PurchaseOrder.json" --> C1["fa:fa-file-code PurchaseOrder.json"]
 
-        B2["vendorID.js"] -- "Reads" --> C1
-        B2 -- "POST /suiteql (Vendor IDs)" --> A3
-        A3 -- "Vendor Data (JSON)" --> B2
+        B2["vendorID.js"]
+        C1 -- "Reads" --> B2
+        NS2 -- "Vendor Data (JSON)" --> B2
         B2 -- "VendorID.json" --> C2["fa:fa-file-code VendorID.json"]
 
         B3["fullSourcing.js (Core Engine)"]
@@ -67,11 +72,11 @@ graph TD
         D2 -- "Generates" --> E3["fa:fa-file-excel Output.xlsx"]
     end
 
-
-
     style A1 fill:#d4edda,stroke:#155724
     style A2 fill:#d4edda,stroke:#155724
-    style A3 fill:#cce5ff,stroke:#004085
+    
+    style NS1 fill:#cce5ff,stroke:#004085
+    style NS2 fill:#cce5ff,stroke:#004085
 
     style B1 fill:#f8d7da,stroke:#721c24
     style B2 fill:#f8d7da,stroke:#721c24
