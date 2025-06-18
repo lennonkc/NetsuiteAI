@@ -231,8 +231,7 @@ You can comment out or modify `src/index.js` to run different sub-tasks, such as
 │   │   ├── xlsxGenerator.js # Generates Excel reports
 │   │   └── xlsxToJson.js    # (Inferred) Converts Excel to JSON
 │   └── index.js             # Main entry point of the project
-├── .env.example             # Example environment file
 ├── .gitignore               # Git ignore configuration
 ├── package.json             # Project dependencies and scripts
 ├── package-lock.json        # Locked dependency versions
-└── README.md                # Project documentation (Chinese)
+└── README.md                # Project documentation
