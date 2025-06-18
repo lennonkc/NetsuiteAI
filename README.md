@@ -67,11 +67,7 @@ graph TD
         D2 -- "Generates" --> E3["fa:fa-file-excel Output.xlsx"]
     end
 
-    subgraph "Final Outputs"
-        E1["fa:fa-file-code MergedTable.html"]
-        E2["fa:fa-file-code VendorReport.html"]
-        E3["fa:fa-file-excel Output.xlsx"]
-    end
+
 
     style A1 fill:#d4edda,stroke:#155724
     style A2 fill:#d4edda,stroke:#155724
