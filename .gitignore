@@ -4,5 +4,7 @@ node_modules/
 npm-debug.log
 yarn-debug.log*
 private/
+!private/PaymentTerm_define.csv
+!private/private/paid_PO_Example.csv
 .DS_Store
 public/
