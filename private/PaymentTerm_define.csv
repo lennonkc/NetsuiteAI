@@ -1,0 +1,21 @@
+Term Name,Deposit Required,Prepay % (Due <= ERD),Net Days (Due post ERD)
+Net 30,0%,0%,30
+10% Dep & 90% Net 30,10%,0%,30
+PIA 30-70,30%,70%,0
+30/70 (Net 30),30%,0%,30
+30/70 (against B/L copy),30%,70%,0
+100% against BL copy,0%,100%,0
+PIA 40-60,40%,60%,0
+Net 45,0%,0%,45
+Net 60,0%,0%,60
+30/70 (Net 60),30%,0%,60
+20/80% against BL,20%,80%,0
+PIA 50-50,50%,50%,0
+PIA 50 + Net 30,50%,0%,30
+20 days credit,0%,0%,20
+PIA 100,100%,0%,0
+Net 15,0%,0%,15
+PIA 25-75,25%,75%,0
+100% after production,0%,100%,0
+Net 10,0%,0%,10
+Net 14,0%,0%,14
